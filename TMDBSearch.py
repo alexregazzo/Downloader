@@ -4,7 +4,7 @@ import json
 
 class TMDBSearch:
     def __init__(self):
-        with open("userconfig/tmdb") as f:
+        with open("userconfig/tmdb.json") as f:
             tmdb_data = json.load(f)
         self.API_KEY = tmdb_data['KEY']
 
