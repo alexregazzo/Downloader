@@ -4,14 +4,7 @@ import TPB
 import KAT
 import time
 import datetime
-
-
-def do_search_on_tpb():
-    pass
-
-
-def do_search_on_kat():
-    pass
+import utils
 
 
 def run():
@@ -33,7 +26,11 @@ def run():
                 failedintpb += 1
                 logger.debug("Succeed TPB")
                 for match in searchtpb:
-                    database.addLink(episode['ser_id'], episode['epi_temporada'], episode['epi_episodio'], match['name'], match['magnet'], match['seeders'])
+                    specs = utils.get_specs_from_name(match['name'])
+                    if specs['ser_nome'] == episode['ser_nome'].title() and specs['epi_temporada'] == int(episode['epi_temporada']) and specs['epi_episodio'] == int(episode['epi_episodio']):
+                        database.addLink(episode['ser_id'], episode['epi_temporada'], episode['epi_episodio'], match['name'], match['magnet'], match['seeders'])
+                    else:
+                        logger.debug(f"Link did not match episode: {match} {specs} {episode}")
             else:
                 logger.debug("Failed TPB")
                 failedintpb -= 1
@@ -42,7 +39,11 @@ def run():
                     failedinkat += 1
                     logger.debug("Succeed KAT")
                     for match in searchkat:
-                        database.addLink(episode['ser_id'], episode['epi_temporada'], episode['epi_episodio'], match['name'], match['magnet'], match['seeders'])
+                        specs = utils.get_specs_from_name(match['name'])
+                        if specs['ser_nome'] == episode['ser_nome'].title() and specs['epi_temporada'] == int(episode['epi_temporada']) and specs['epi_episodio'] == int(episode['epi_episodio']):
+                            database.addLink(episode['ser_id'], episode['epi_temporada'], episode['epi_episodio'], match['name'], match['magnet'], match['seeders'])
+                        else:
+                            logger.debug(f"Link did not match episode: {match} {specs} {episode}")
                 else:
                     logger.debug("Failed KAT")
                     failedinkat -= 1
