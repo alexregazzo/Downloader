@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS episodio (
   epi_episodio INT NOT NULL,
   epi_lancamento DATE NOT NULL,
   epi_baixar BOOL NOT NULL DEFAULT TRUE,
-  epi_link VARCHAR(500) NULL DEFAULT NULL,
   epi_uatualizacao DATETIME NOT NULL DEFAULT '1900-01-01 00:00:00',
   epi_adicionado DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (ser_id, epi_temporada, epi_episodio),
