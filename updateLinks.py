@@ -27,6 +27,9 @@ def run():
                 logger.debug("Succeed TPB")
                 for match in searchtpb:
                     specs = utils.get_specs_from_name(match['name'])
+                    if specs is None:
+                        logger.debug(f"Returned none from specs: {match['name']}")
+                        continue
                     if specs['ser_nome'] == episode['ser_nome'].title() and specs['epi_temporada'] == int(episode['epi_temporada']) and specs['epi_episodio'] == int(episode['epi_episodio']):
                         database.addLink(episode['ser_id'], episode['epi_temporada'], episode['epi_episodio'], match['name'], match['magnet'], match['seeders'])
                     else:
@@ -40,6 +43,9 @@ def run():
                     logger.debug("Succeed KAT")
                     for match in searchkat:
                         specs = utils.get_specs_from_name(match['name'])
+                        if specs is None:
+                            logger.debug(f"Returned none from specs: {match['name']}")
+                            continue
                         if specs['ser_nome'] == episode['ser_nome'].title() and specs['epi_temporada'] == int(episode['epi_temporada']) and specs['epi_episodio'] == int(episode['epi_episodio']):
                             database.addLink(episode['ser_id'], episode['epi_temporada'], episode['epi_episodio'], match['name'], match['magnet'], match['seeders'])
                         else:

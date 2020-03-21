@@ -42,6 +42,8 @@ def run():
             except:
                 logger.exception("An error ocurred")
             time.sleep(5)
+    except:
+        logger.exception("Something not expected went wrong")
     finally:
         logger.debug("QUITTING ADDEPISODES RUN")
 
