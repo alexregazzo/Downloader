@@ -11,10 +11,8 @@ download series' episodes to be watched.
 * Connection to the internet
 * Some python packages listed on [requirements.txt](./requirements.txt)
 * [Mysql server](https://dev.mysql.com/downloads/mysql/) installed locally (can run remotely if configured)
-* [mysql.connector](https://dev.mysql.com/downloads/connector/python/) (not tested if installing via pip works)
 * API key from [TMDB](https://www.themoviedb.org/settings/api)
 * [uTorrent](https://www.utorrent.com/intl/pt/downloads/win_us) (current version (v2.0) might work on other torrent clients (might change on later updates)) 
- 
 
 ### v2.0 new features
 - User features:

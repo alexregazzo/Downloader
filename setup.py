@@ -13,7 +13,7 @@ os.system("pause")
 
 if not os.path.exists("userconfig"):
     os.mkdir("userconfig")
-print("Você precisa de uma chave de acesso a API do TMDB(https://www.themoviedb.org/)")
+print("Você precisa de uma chave de acesso da API do TMDB(https://www.themoviedb.org/)")
 tmdb_api_key = input("Insira a chave de acesso da API:")
 
 try:
@@ -34,8 +34,8 @@ os.system("pip install -r requirements.txt")
 print("Instalação de pacotes finalizada!")
 print("Configuração do banco de dados:")
 print("O banco de dados a ser utilizado é o mysqlserver da microsoft diponível em: https://dev.mysql.com/downloads/mysql/ ")
-print("Além disso, deve estar instalado o mysql.connector disponível em: https://dev.mysql.com/downloads/connector/python/")
-resp = input("Os programas foram instalados?[s/n]").lower()
+print("Você necessitará saber o host, username e password do server do banco de dados")
+resp = input("O programa foi instalado?[s/n]").lower()
 if resp != 's':
     print("Instale e inicie o setup novamente")
     print("Saindo...")
