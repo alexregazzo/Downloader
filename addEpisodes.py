@@ -31,7 +31,7 @@ def run():
                                 try:
                                     database.addEpisode(ep["ser_id"], ep["epi_temporada"], ep["epi_episodio"], ep_tmdb['air_date'])  # return bool
                                 except:
-                                    logger.debug(ep)
+                                    logger.debug(f"{ep} {ep_tmdb}")
                                     logger.exception(ep_tmdb)
 
                             if EXIT:
