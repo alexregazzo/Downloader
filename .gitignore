@@ -1,0 +1,9 @@
+**/*.log
+**/.idea/
+**/__pycache__/
+**/FUTURE_DEVELOPMENT/
+**/.testing
+**/cache/
+**/*.pyc
+userconfig/*.*
+!config.json

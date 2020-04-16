@@ -128,7 +128,7 @@ else:
                     print("Sucesso 19/20")
                     conn.close()
                     print("Sucesso 20/20")
-                    
+
                 else:
                     raise Exception("Wrong data")
             else:

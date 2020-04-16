@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS episodio (
   PRIMARY KEY (ser_id, epi_temporada, epi_episodio),
   CONSTRAINT fk_EPISODIO_SERIE
     FOREIGN KEY (ser_id)
-    REFERENCES series.serie (ser_id))
+    REFERENCES serie (ser_id))
   ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4;
 

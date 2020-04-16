@@ -18,7 +18,7 @@ class TMDB:
         self.lock = threading.RLock()
 
     @staticmethod
-    def _validateDate(a: int, b: int, limit: int = 10800):
+    def _validateDate(a: float, b: float, limit: float = 10800):
         """
         :param a: [seconds]
         :param b: [seconds]
