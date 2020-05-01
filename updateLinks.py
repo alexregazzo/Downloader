@@ -19,21 +19,14 @@ def run():
             # print(episode, (datetime.datetime.now() - episode['epi_uatualizacao']), datetime.timedelta(hours=3) > (datetime.datetime.now() - episode['epi_uatualizacao']))
             if datetime.timedelta(hours=3) > (datetime.datetime.now() - episode['epi_uatualizacao']):
                 continue
+            search_results = None
             searchtpb = None
             if failedintpb > 0 or (failedintpb <= 0 and failedinkat <= 0):
                 searchtpb = tpb.fsearch(episode['ser_nome'], episode['epi_temporada'], episode['epi_episodio'])
             if searchtpb is not None and len(searchtpb) > 0:
                 failedintpb += 1
                 logger.debug("Succeed TPB")
-                for match in searchtpb:
-                    specs = utils.get_specs_from_name(match['name'])
-                    if specs is None:
-                        logger.debug(f"Returned none from specs: {match['name']}")
-                        continue
-                    if specs['ser_nome'] == episode['ser_nome'].title() and specs['epi_temporada'] == int(episode['epi_temporada']) and specs['epi_episodio'] == int(episode['epi_episodio']):
-                        database.addLink(episode['ser_id'], episode['epi_temporada'], episode['epi_episodio'], match['name'], match['magnet'], match['seeders'])
-                    else:
-                        logger.debug(f"Link did not match episode: {match} {specs} {episode}")
+                search_results = searchtpb
             else:
                 logger.debug("Failed TPB")
                 failedintpb -= 1
@@ -41,18 +34,19 @@ def run():
                 if searchkat is not None and len(searchkat) > 0:
                     failedinkat += 1
                     logger.debug("Succeed KAT")
-                    for match in searchkat:
-                        specs = utils.get_specs_from_name(match['name'])
-                        if specs is None:
-                            logger.debug(f"Returned none from specs: {match['name']}")
-                            continue
-                        if specs['ser_nome'] == episode['ser_nome'].title() and specs['epi_temporada'] == int(episode['epi_temporada']) and specs['epi_episodio'] == int(episode['epi_episodio']):
-                            database.addLink(episode['ser_id'], episode['epi_temporada'], episode['epi_episodio'], match['name'], match['magnet'], match['seeders'])
-                        else:
-                            logger.debug(f"Link did not match episode: {match} {specs} {episode}")
+                    search_results = searchkat
                 else:
                     logger.debug("Failed KAT")
                     failedinkat -= 1
+            if search_results:
+                for match in search_results:
+                    name1 = match['name']
+                    name2 = f"{episode['ser_nome']} s{int(episode['epi_temporada']):02}e{int(episode['epi_episodio']):02}"
+                    if utils.match(name1=name1, name2=name2):
+                        database.addLink(episode['ser_id'], episode['epi_temporada'], episode['epi_episodio'], match['name'], match['magnet'], match['seeders'])
+                    else:
+                        logger.debug(f"Link did not match episode: {name1} {name2}")
+
             if not database.setEpisodeUpdated(episode['ser_id'], episode['epi_temporada'], episode['epi_episodio']):
                 logger.warning("%s %s %s - PROBLEM" % (episode['ser_nome'], episode['epi_temporada'], episode['epi_episodio']))
                 if EXIT:

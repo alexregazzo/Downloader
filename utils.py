@@ -73,5 +73,18 @@ def get_specs_from_name(txt):
         return None
 
 
+def match(*, name1, name2) -> bool:
+    specs1 = get_specs_from_name(name1)
+    specs2 = get_specs_from_name(name2)
+    print(name1)
+    print(specs1)
+    print(name2)
+    print(specs2)
+    if specs1 is None or specs2 is None:
+        return False
+
+    return specs1['ser_nome'] == specs2['ser_nome'] and specs1['epi_temporada'] == specs2['epi_temporada'] and specs1['epi_episodio'] == specs1['epi_episodio']
+
+
 if __name__ == "__main__":
     pass
