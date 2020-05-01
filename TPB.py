@@ -42,6 +42,7 @@ class TPB:
                     })
 
                     results.append(torrent)
+                self.logger.debug(f"TPB {len(results)} results found")
                 return results
             return None
         except:
