@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 class TPB:
     def __init__(self, *args, **kwargs):
         self.logger = logging.getLogger("Program.%s" % __name__)
-        self.url = "https://thepiratebay.org/search.php?q={q}"
+        self.url = "https://apibay.org/q.php?q={q}&cat="
         pass
 
     @staticmethod
@@ -24,8 +24,7 @@ class TPB:
 
     def _search(self, url):
         try:
-            # soup = BeautifulSoup()
-            response = requests.get("https://apibay.org/q.php?q=the%20blacklist%20s07e02&cat=")
+            response = requests.get(url)
             if response.ok:
                 torrents = response.json()
                 results = []
@@ -60,6 +59,6 @@ class TPB:
 
 
 if __name__ == "__main__":
-    # tpb = TPB()
-    # print(tpb.fsearch("the blacklist", 1, 2))
+    tpb = TPB()
+    print(tpb.fsearch("élite", 1, 2))
     pass
