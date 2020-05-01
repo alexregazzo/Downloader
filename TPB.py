@@ -60,5 +60,6 @@ class TPB:
 
 if __name__ == "__main__":
     tpb = TPB()
-    print(tpb.fsearch("élite", 1, 2))
-    pass
+    # print(tpb.fsearch("élite", 1, 2))
+    # pass
+    # print(len("magnet:?xt=urn:btih:394A4E4A0F35AEE986E5837605C7190F0E12BEEF&dn=The.Blacklist.S07E02.HDTV.x264-SVA%5Bettv%5D&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2920%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.pirateparty.gr%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.cyberia.is%3A6969%2Fannounce"))

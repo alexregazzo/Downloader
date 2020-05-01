@@ -3,31 +3,32 @@ import threading
 import settings
 import database
 
+LOG_FORMAT = "%(asctime)s - %(levelname)s :: (%(threadName)-9s) :: %(name)s  %(lineno)d :: %(message)s"
 logger = logging.getLogger("Program")
 logger.setLevel(logging.DEBUG)
 fh = logging.FileHandler('log_debug.log', mode=("a" if not settings.DEVELOMENT_MODE else "w"))
 fh.setLevel(logging.DEBUG)
-fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s :: (%(threadName)-9s) :: %(name)s :: %(message)s'))
+fh.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(fh)
 
 fh = logging.FileHandler('log_info.log', mode=("a" if not settings.DEVELOMENT_MODE else "w"))
 fh.setLevel(logging.INFO)
-fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s :: (%(threadName)-9s) :: %(name)s :: %(message)s'))
+fh.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(fh)
 
 fh = logging.FileHandler('log_warning.log', mode=("a" if not settings.DEVELOMENT_MODE else "w"))
 fh.setLevel(logging.WARNING)
-fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s :: (%(threadName)-9s) :: %(name)s :: %(message)s'))
+fh.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(fh)
 
 fh = logging.FileHandler('log_error.log', mode=("a" if not settings.DEVELOMENT_MODE else "w"))
 fh.setLevel(logging.ERROR)
-fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s :: (%(threadName)-9s) :: %(name)s :: %(message)s'))
+fh.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(fh)
 
 fh = logging.FileHandler('log_critical.log', mode=("a" if not settings.DEVELOMENT_MODE else "w"))
 fh.setLevel(logging.CRITICAL)
-fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s :: (%(threadName)-9s) :: %(name)s :: %(message)s'))
+fh.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(fh)
 
 logger.debug("*" * 50)

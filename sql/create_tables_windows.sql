@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS link (
     epi_temporada INT NOT NULL,
     epi_episodio INT NOT NULL,
     lin_nome VARCHAR(150) NOT NULL,
-    lin_link VARCHAR(500) NOT NULL,
+    lin_link VARCHAR(1000) NOT NULL,
     lin_baixando BOOL NOT NULL DEFAULT 0,
     lin_baixado BOOL NOT NULL DEFAULT 0,
     lin_baixadoem DATETIME NULL,
