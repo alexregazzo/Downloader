@@ -76,10 +76,6 @@ def get_specs_from_name(txt):
 def match(*, name1, name2) -> bool:
     specs1 = get_specs_from_name(name1)
     specs2 = get_specs_from_name(name2)
-    print(name1)
-    print(specs1)
-    print(name2)
-    print(specs2)
     if specs1 is None or specs2 is None:
         return False
 
