@@ -24,6 +24,90 @@ UPDATE_MAJOR = 3
 # --------------------------------------------------------------------------------------
 
 
+def _install(logger, userdata=None):
+    # import github, install if necessary
+    if userdata is None:
+        userdata = {}
+    logger.debug("Importing github")
+    try:
+        from github import Github
+    except ModuleNotFoundError:
+        logger.debug("Importing failed, module not found, installing")
+        os.system("pip install PyGithub")
+        logger.debug("Installed")
+        logger.debug("Importing github again")
+        from github import Github
+        logger.debug("Imported")
+    try:
+        with open("version.json") as f:
+            userdata.update(json.load(f))
+    except:
+        pass
+    # connect to github
+    print("Connecting...")
+    logger.debug("Connect to github")
+    github = Github(GITHUB_TOKEN)
+    repo = github.get_repo("alexregazzo/%s" % REPO_NAME)
+
+    # download files
+    logger.debug("Download starting")
+    contents = repo.get_contents("", BRANCH_NAME)
+    print("Downloading...")
+    version_file_path = None
+    while len(contents) > 0:
+        content_file = contents.pop(0)
+        logger.debug("Trying %s" % content_file.name)
+        if content_file.type == "dir":
+            logger.debug("Is folder: expanding")
+            contents.extend(repo.get_contents(content_file.path, BRANCH_NAME))
+            logger.debug("Expanded")
+        else:
+            path = os.path.join(INSTALL_DIRPATH, content_file.path)
+            directory, _ = os.path.split(path)
+            os.makedirs(directory, exist_ok=True)
+            logger.debug("Download content")
+            print("Downloading %s" % content_file.name)
+            for _ in range(3):
+                response = requests.get(content_file.download_url)
+                if response.status_code == 200:
+                    logger.debug("Request success")
+                    if content_file.name == "version.json":
+                        version_file_path = os.path.join(INSTALL_DIRPATH, content_file.path)
+                        userdata.update(json.loads(response.text))
+                        logger.debug("Found version file")
+                        break
+                    logger.debug("Write")
+                    with open(path, "w", encoding="utf8") as f:
+                        f.write(response.text)
+                    logger.debug("Write success on %s" % path)
+                    break
+                else:
+                    print("Error, retrying")
+                    logger.warning("Request error on file %s" % path)
+            else:
+                print("Failed on file %s" % content_file.path)
+                logger.critical("Error while downloading %s" % path)
+
+    # installing modules
+    logger.debug("Installing modules")
+    print("Installing modules")
+    os.system("pip install -r requirements.txt")
+    print("Finish installing modules")
+    logger.debug("Finished installing modules")
+    if version_file_path is None:
+        logger.critical("Version file not found")
+        logger.warning("Quitting!")
+        print("An error ocurred")
+        os.system("pause")
+        sys.exit(1)
+    logger.debug("Download finished")
+
+    logger.debug("Writing version file")
+    with open(version_file_path, "w", encoding="utf8") as f:
+        json.dump(userdata, f)
+    logger.debug("Writing done")
+
+
 def install():
     # Initialize installation log
     os.makedirs(os.path.join(INSTALLATION_LOG_DIRPATH), exist_ok=True)
@@ -56,76 +140,6 @@ def install():
             sys.exit(0)
         logger.debug("Starting")
         print("Starting...")
-        # import github, install if necessary
-        logger.debug("Importing github")
-        try:
-            from github import Github
-        except ModuleNotFoundError:
-            logger.debug("Importing failed, module not found, installing")
-            os.system("pip install PyGithub")
-            logger.debug("Installed")
-            logger.debug("Importing github again")
-            from github import Github
-            logger.debug("Imported")
-
-        # connect to github
-        print("Connecting...")
-        logger.debug("Connect to github")
-        github = Github(GITHUB_TOKEN)
-        repo = github.get_repo("alexregazzo/%s" % REPO_NAME)
-
-        # download files
-        logger.debug("Download starting")
-        contents = repo.get_contents("", BRANCH_NAME)
-        print("Downloading...")
-        version_file_path = None
-        while len(contents) > 0:
-            content_file = contents.pop(0)
-            logger.debug("Trying %s" % content_file.name)
-            if content_file.type == "dir":
-                logger.debug("Is folder: expanding")
-                contents.extend(repo.get_contents(content_file.path, BRANCH_NAME))
-                logger.debug("Expanded")
-            else:
-                path = os.path.join(INSTALL_DIRPATH, content_file.path)
-                directory, _ = os.path.split(path)
-                os.makedirs(directory, exist_ok=True)
-                logger.debug("Download content")
-                print("Downloading %s" % content_file.name)
-                for _ in range(3):
-                    response = requests.get(content_file.download_url)
-                    if response.status_code == 200:
-                        logger.debug("Request success")
-                        if content_file.name == "version.json":
-                            version_file_path = os.path.join(INSTALL_DIRPATH, content_file.path)
-                            userdata.update(json.loads(response.text))
-                            logger.debug("Found version file")
-                            break
-                        logger.debug("Write")
-                        with open(path, "w", encoding="utf8") as f:
-                            f.write(response.text)
-                        logger.debug("Write success on %s" % path)
-                        break
-                    else:
-                        print("Error, retrying")
-                        logger.warning("Request error on file %s" % path)
-                else:
-                    print("Failed on file %s" % content_file.path)
-                    logger.critical("Error while downloading %s" % path)
-
-        # installing modules
-        logger.debug("Installing modules")
-        print("Installing modules")
-        os.system("pip install -r requirements.txt")
-        print("Finish installing modules")
-        logger.debug("Finished installing modules")
-        if version_file_path is None:
-            logger.critical("Version file not found")
-            logger.warning("Quitting!")
-            print("An error ocurred")
-            os.system("pause")
-            sys.exit(1)
-        logger.debug("Download finished")
 
         # user database setup
         logger.debug("Setup database started")
@@ -136,12 +150,7 @@ def install():
                 }
             })
 
-        logger.debug("Config finished")
-        logger.debug("Writing version file")
-        with open(version_file_path, "w", encoding="utf8") as f:
-            json.dump(userdata, f)
-        logger.debug("Writing done")
-
+        _install(logger, userdata)
         logger.debug("Finished installation")
         print("Installation finished successfully")
         os.system("pause")
@@ -220,127 +229,8 @@ def update():
     logger = logging.getLogger("Program.{}".format("update"))
     logger.debug("Updating")
     try:
-        # get current version
-        with open("version.json") as f:
-            userdata = json.load(f)
 
-        # delete keys expect user config
-        for key in [key for key in userdata if key not in ["TMDB", "DATABASE"]]:
-            del userdata[key]
-
-        # confirm delete of existing files
-        from send2trash import send2trash
-        if input("All files on this folder will be deleted, would you like to continue?[y/n]").lower() != "y":
-            logger.debug("Quitting by user")
-            print("Quitting...")
-            os.system("pause")
-            sys.exit(0)
-
-        # connect to github
-        logger.debug("Importing github")
-        from github import Github
-        print("Connecting...")
-        logger.debug("Connect to github")
-        github = Github(GITHUB_TOKEN)
-        repo = github.get_repo("alexregazzo/%s" % REPO_NAME)
-
-        # download files
-        logger.debug("Download starting")
-        print("Downloading...")
-        all_files = []
-        contents = repo.get_contents("", BRANCH_NAME)
-        version_file_found = False
-        number_of_errors = 0
-        while len(contents) > 0:
-            content_file = contents.pop(0)
-            logger.debug("Trying %s" % content_file.name)
-            if content_file.type == "dir":
-                logger.debug("Is folder: expanding")
-                contents.extend(repo.get_contents(content_file.path, BRANCH_NAME))
-                logger.debug("Expanded")
-            else:
-                path = os.path.join(INSTALL_DIRPATH, content_file.path)
-                directory, _ = os.path.split(path)
-                os.makedirs(directory, exist_ok=True)
-                logger.debug("Download content")
-                print("Downloading %s" % content_file.name)
-                for _ in range(3):
-                    response = requests.get(content_file.download_url)
-                    if response.status_code == 200:
-                        logger.debug("Request success")
-                        if content_file.name == "version.json":
-                            logger.debug("Found version file")
-                            logger.debug("Updating current version file")
-                            userdata.update(json.loads(response.text))
-                            all_files.append({
-                                "path": path,
-                                "content": json.dumps(userdata)
-                            })
-                            version_file_found = True
-                        else:
-                            all_files.append({
-                                "path": path,
-                                "content": response.text
-                            })
-                        logger.debug("Success download on %s" % path)
-                        break
-                    else:
-                        print("Error, retrying")
-                        logger.warning("Request error on file %s" % path)
-                else:
-                    print("Failed on file %s" % content_file.path)
-                    logger.critical("Problem while downloading %s" % path)
-                    number_of_errors += 1
-        logger.debug("Problems found: %d" % number_of_errors)
-        logger.debug("Downloading files done")
-        print("Downloading files done")
-        print("Errors found: %d" % number_of_errors)
-        if version_file_found is False:
-            logger.critical("Version file was not found!")
-        if number_of_errors > 0 or version_file_found is False:
-            print("There were errors while downloading the files so the update will not continue")
-            print("Check your internet connection and try again later")
-            print("If the error persists, contact the developer")
-            os.system("pause")
-            sys.exit(1)
-
-        # delete files
-        logger.debug("Delete files")
-        print("Deleting files")
-        for current_dir, folder, files in os.walk("."):
-            if current_dir in [".\logs", ".\idea"]:
-                logger.debug("Continuing on %s" % current_dir)
-                continue
-            for file in files:
-                logger.debug("Deleting %s" % os.path.join(current_dir, file))
-                print("Deleting %s" % os.path.join(current_dir, file))
-                try:
-                    send2trash(os.path.join(current_dir, file))
-                except PermissionError:
-                    logger.warning("Permission error on file %s" % os.path.join(current_dir, file))
-                else:
-                    logger.debug("Deleted")
-        logger.debug("File deletion finished")
-        print("Deleting files done")
-
-        logger.debug("Write files on disk")
-        print("Writting files on disk")
-        for file in all_files:
-            logger.debug("Writting %s" % file['path'])
-            print("Writting %s" % file['path'])
-            with open(file['path'], 'w', encoding="utf8") as f:
-                f.write(file['content'])
-            logger.debug("Success")
-        logger.debug("Writting done")
-        print("Writting done")
-
-        # install modules
-        logger.debug("Installing modules")
-        print("Installing modules")
-        os.system("pip install -r requirements.txt")
-        print("Finish installing modules")
-        logger.debug("Finished installing modules")
-
+        _install(logger)
         logger.debug("Finished updating")
         print("Updating finished successfully")
         print("Reopen Downloader to continue")
