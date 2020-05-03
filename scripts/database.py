@@ -9,7 +9,7 @@ DATABASE_NAME = "data.db"
 DATABASE_DIR = settings.ABSOLUTE_PATHS['DATABASE_DIRPATH']
 DATETIME_FORMAT = settings.DATETIME_FORMAT
 SQL_NAME = "tables.sql"
-SQL_PATH = os.path.join(settings.ABSOLUTE_PATHS['SQL_DIRPATH'],SQL_NAME)
+SQL_PATH = os.path.join(settings.ABSOLUTE_PATHS['SQL_DIRPATH'], SQL_NAME)
 
 
 class Database:
@@ -23,13 +23,9 @@ class Database:
         self.logger.info("Database initiated!")
         self.cursor = self.conn.cursor()
         self.cursor.execute("PRAGMA foreign_keys = ON")
-        self.create_tables()
-
-    def create_tables(self):
-        with self.lock:
-            with open(SQL_PATH) as f:
-                self.cursor.executescript(f.read())
-            self.conn.commit()
+        with open(SQL_PATH) as f:
+            self.cursor.executescript(f.read())
+        self.conn.commit()
 
     def insert(self, query):
         with self.lock:

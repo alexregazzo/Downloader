@@ -1,7 +1,9 @@
 import logging
 import threading
 import os
-from scripts import settings, database
+import sys
+import json
+from scripts import settings, setup
 
 LOG_FORMAT = settings.LOG_FORMAT
 logger = logging.getLogger("Program")
@@ -39,16 +41,36 @@ logger.debug("*" * 50)
 logger.debug("Initiated")
 logger.debug("*" * 50)
 logger.debug("*" * 50)
-logger.debug("Importing modules")
 
-logger.debug("Modules imported")
+try:
+    with open("version.json") as f:
+        VERSION = json.load(f)
+except (FileNotFoundError, json.decoder.JSONDecodeError):
+    print("Something is wrong with your installation")
+    print("Please run setup or contact developers")
+    os.system("pause")
+    sys.exit(1)
+
+# CHECK UPDATES
+logger.debug("Check updates")
+update = setup.check_update()
+if update != setup.UPDATE_NONE:
+    # Update available
+    if update == setup.UPDATE_MAJOR:
+        print("There is a MAJOR update available")
+    elif update == setup.UPDATE_MINOR:
+        print("There is a MINOR update available")
+    elif update == setup.UPDATE_PATCH_OR_BUG_FIX:
+        print("There is a bug fix or patch update available")
+    if input("Would you like to update? [y/n]").lower() == "y":
+        setup.update()
+        sys.exit(0)
+
+# INIT
+logger.debug("Init")
 
 if __name__ == '__main__':
     try:
-        logger.debug("CREATING TABLES")
-        db = database.Database()
-        db.create_tables()
-
         from scripts import download, addEpisodes, updateLinks, settings, database, user
 
         logger.debug("Starting threads")
