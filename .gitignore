@@ -9,3 +9,4 @@
 userconfig/*.*
 !config.json
 
+logs/teste.py
