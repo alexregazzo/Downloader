@@ -9,7 +9,7 @@ import json
 # github
 GITHUB_TOKEN = "b30a3c77f56f8c39047b00f1aa232bf6ddcd3e2a"
 REPO_NAME = "Downloader"
-BRANCH_NAME = "master"
+BRANCH_NAME = "organize"
 INSTALL_DIRPATH = "."
 # log
 INSTALLATION_LOG_DIRPATH = "."
