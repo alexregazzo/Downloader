@@ -214,7 +214,6 @@ def check_update():
             version = json.load(f)
         local_version = version["version"]
         logger.debug("Local version found: %s" % local_version)
-        print(True)
         # Get remote version
 
         from github import Github
@@ -225,7 +224,6 @@ def check_update():
         try:
             content_file = repo.get_contents("version.json", BRANCH_NAME)
             response = requests.get(content_file.download_url)
-            print(response.status_code)
             if response.status_code == 200:
                 remote_version_data = json.loads(response.text)
         except:
