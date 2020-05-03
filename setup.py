@@ -9,7 +9,7 @@ import json
 # github
 GITHUB_TOKEN = "b30a3c77f56f8c39047b00f1aa232bf6ddcd3e2a"
 REPO_NAME = "Downloader"
-BRANCH_NAME = "organize"
+BRANCH_NAME = "master"
 INSTALL_DIRPATH = "."
 # log
 INSTALLATION_LOG_DIRPATH = "."
@@ -233,7 +233,7 @@ def update():
         _install(logger)
         logger.debug("Finished updating")
         print("Updating finished successfully")
-        print("Reopen Downloader to continue")
+        print("Reopen main to continue")
         os.system("pause")
         return
     except:

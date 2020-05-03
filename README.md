@@ -4,7 +4,7 @@ download series' episodes to be watched.
 
 ## How to use
 - **Clone** the git repository
-- [Download](https://raw.githubusercontent.com/alexregazzo/Downloader/organize/setup.py) and run **setup**
+- [Download](https://raw.githubusercontent.com/alexregazzo/Downloader/master/setup.py) and run **setup**
 > Note: by clicking the 'download' button you will be redirected to the github page that contains that file, save it by pressing ctrl + s
 - Run **main** whenever you want the program to run
 
