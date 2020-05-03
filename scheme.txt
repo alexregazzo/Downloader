@@ -1,0 +1,17 @@
+- scripts/
+    - config/
+        - general.json
+    - program files *.py
+    - sqltablessqlite.sql
+- config/
+    - tmdb.json
+- logs/
+    - all log files *.log
+- requirements.txt
+- .gitignore
+- README.md
+- version.json
+- index.html [workflow]
+- data.db
+- setup.py
+- main.py [main will run setup if needed]

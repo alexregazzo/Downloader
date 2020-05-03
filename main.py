@@ -1,32 +1,38 @@
 import logging
 import threading
-import settings
-import database
+import os
+import sys
+import json
+from scripts import settings
+import setup
 
-LOG_FORMAT = "%(asctime)s - %(levelname)s :: (%(threadName)-9s) :: %(name)s  %(lineno)d :: %(message)s"
+LOG_FORMAT = settings.LOG_FORMAT
 logger = logging.getLogger("Program")
 logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler('log_debug.log', mode=("a" if not settings.DEVELOMENT_MODE else "w"))
+LOGGING_MODE = "a" if not settings.DEVELOMENT_MODE else "w"
+LOGGING_DIRPATH = settings.ABSOLUTE_PATHS['LOGGING_DIRPATH']
+
+fh = logging.FileHandler(os.path.join(LOGGING_DIRPATH, 'log_debug.log'), mode=LOGGING_MODE)
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(fh)
 
-fh = logging.FileHandler('log_info.log', mode=("a" if not settings.DEVELOMENT_MODE else "w"))
+fh = logging.FileHandler(os.path.join(LOGGING_DIRPATH, 'log_info.log'), mode=LOGGING_MODE)
 fh.setLevel(logging.INFO)
 fh.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(fh)
 
-fh = logging.FileHandler('log_warning.log', mode=("a" if not settings.DEVELOMENT_MODE else "w"))
+fh = logging.FileHandler(os.path.join(LOGGING_DIRPATH, 'log_warning.log'), mode=LOGGING_MODE)
 fh.setLevel(logging.WARNING)
 fh.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(fh)
 
-fh = logging.FileHandler('log_error.log', mode=("a" if not settings.DEVELOMENT_MODE else "w"))
+fh = logging.FileHandler(os.path.join(LOGGING_DIRPATH, 'log_error.log'), mode=LOGGING_MODE)
 fh.setLevel(logging.ERROR)
 fh.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(fh)
 
-fh = logging.FileHandler('log_critical.log', mode=("a" if not settings.DEVELOMENT_MODE else "w"))
+fh = logging.FileHandler(os.path.join(LOGGING_DIRPATH, 'log_critical.log'), mode=LOGGING_MODE)
 fh.setLevel(logging.CRITICAL)
 fh.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(fh)
@@ -36,28 +42,37 @@ logger.debug("*" * 50)
 logger.debug("Initiated")
 logger.debug("*" * 50)
 logger.debug("*" * 50)
-logger.debug("Importing modules")
 
-if settings.DEVELOMENT_MODE:
-    logger.warning("-" * 50)
-    logger.warning("-" * 50)
-    logger.warning("USING: '{database}'".format(**settings.DATABASE))
-    logger.warning("DEVELOPMENT: '{}'".format(settings.DEVELOMENT_MODE))
-    logger.warning("-" * 50)
-    logger.warning("-" * 50)
+try:
+    with open("version.json") as f:
+        VERSION = json.load(f)
+except (FileNotFoundError, json.decoder.JSONDecodeError):
+    print("Something is wrong with your installation")
+    print("Please run setup or contact developers")
+    os.system("pause")
+    sys.exit(1)
 
-logger.debug("Modules imported")
+# CHECK UPDATES
+logger.debug("Check updates")
+update = setup.check_update()
+if update != setup.UPDATE_NONE:
+    # Update available
+    if update == setup.UPDATE_MAJOR:
+        print("There is a MAJOR update available")
+    elif update == setup.UPDATE_MINOR:
+        print("There is a MINOR update available")
+    elif update == setup.UPDATE_PATCH_OR_BUG_FIX:
+        print("There is a bug fix or patch update available")
+    if input("Would you like to update? [y/n]").lower() == "y":
+        setup.update()
+        sys.exit(0)
+
+# INIT
+logger.debug("Init")
 
 if __name__ == '__main__':
     try:
-        logger.debug("CREATING TABLES")
-        db = database.Database(autoLoad=False)
-        db.create_tables()
-
-        import addEpisodes
-        import download
-        import updateLinks
-        import user
+        from scripts import download, addEpisodes, updateLinks, settings, database, user
 
         logger.debug("Starting threads")
         threading.Thread(target=addEpisodes.run).start()

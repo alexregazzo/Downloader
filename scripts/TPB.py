@@ -4,7 +4,7 @@ import requests
 
 
 class TPB:
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         self.logger = logging.getLogger("Program.%s" % __name__)
         self.url = "https://apibay.org/q.php?q={q}&cat="
         pass

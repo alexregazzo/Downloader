@@ -1,142 +1,244 @@
+import logging
 import os
+import requests
 import sys
+import json
 
-try:
-    import json
-except:
-    print("Um erro ocorreu ao iniciar alguns módulos")
-    os.system("pause")
-    sys.exit(1)
+# --------------------------------------------------------------------------------------
+# DEFINITIONS
+# github
+GITHUB_TOKEN = "b30a3c77f56f8c39047b00f1aa232bf6ddcd3e2a"
+REPO_NAME = "Downloader"
+BRANCH_NAME = "organize"
+INSTALL_DIRPATH = "."
+# log
+INSTALLATION_LOG_DIRPATH = "."
+LOG_FORMAT = "%(asctime)s - %(levelname)s :: (%(threadName)-9s) :: %(name)s  %(lineno)d :: %(message)s"
+# updates
+UPDATE_NONE = 0
+UPDATE_PATCH_OR_BUG_FIX = 1
+UPDATE_MINOR = 2
+UPDATE_MAJOR = 3
 
-print("Voce precisa ter instalado utorrent para que o programa funcione")
-os.system("pause")
 
-if not os.path.exists("userconfig"):
-    os.mkdir("userconfig")
-print("Você precisa de uma chave de acesso da API do TMDB(https://www.themoviedb.org/)")
-tmdb_api_key = input("Insira a chave de acesso da API:")
+# --------------------------------------------------------------------------------------
 
-try:
-    with open("userconfig/tmdb.json", "w") as f:
-        json.dump({"KEY": tmdb_api_key}, f)
-except Exception as e:
-    print("Um erro ocorreu ao salvar a chave de acesso")
-    print(e)
-    os.system("pause")
-    sys.exit(1)
 
-resp = input("Deseja instalar alguns módulos necessários? [s/n]").lower()
-if resp != 's':
-    print("Saindo...")
-    os.system("pause")
-    sys.exit(0)
-os.system("pip install -r requirements.txt")
-print("Instalação de pacotes finalizada!")
-print("Configuração do banco de dados:")
-print("O banco de dados a ser utilizado é o mysqlserver da microsoft diponível em: https://dev.mysql.com/downloads/mysql/ ")
-print("Você necessitará saber o host, username e password do server do banco de dados")
-resp = input("O programa foi instalado?[s/n]").lower()
-if resp != 's':
-    print("Instale e inicie o setup novamente")
-    print("Saindo...")
-    os.system("pause")
-    sys.exit(0)
-
-try:
-    import mysql.connector
-except ModuleNotFoundError:
-    print("O módulo mysql.connector não foi encontrado, instale-o e inicie novamente.")
-    print("Saindo...")
-    os.system("pause")
-    sys.exit(0)
-else:
-    print("Configurando a conexão com o banco de dados:")
-    host = input("Informe o host do banco de dados (ex: localhost): ")
-    user = input("Informe o usuario do banco de dados (ex: root): ")
-    passwd = input("Informe a senha do banco de dados: ")
-    database = input("Informe o nome do banco de dados (ex: serie):")
-
-    print(f"host: {host}, user: {user}, password:{passwd}, database: {database}")
-    resp = input("Salvar? [s/n]").lower()
-    if resp != 's':
-        print("Não salvo. Saindo...")
-        os.system("pause")
-        sys.exit(0)
+def _install(logger, userdata=None):
+    # import github, install if necessary
+    if userdata is None:
+        userdata = {}
+    logger.debug("Importing github")
     try:
-        database = {
-            "database": {
-                "release": {
-                    "host": host,
-                    "user": user,
-                    "passwd": passwd,
-                    "database": database
-                }
-            }
-        }
-        with open("userconfig/database.json", "w") as f:
-            json.dump(database, f)
-    except Exception as e:
-        print("Um erro desconhecido ocorreu:")
-        print(e)
-        print("Saindo")
+        from github import Github
+    except ModuleNotFoundError:
+        logger.debug("Importing failed, module not found, installing")
+        os.system("pip install PyGithub")
+        logger.debug("Installed")
+        logger.debug("Importing github again")
+        from github import Github
+        logger.debug("Imported")
+    try:
+        with open("version.json") as f:
+            userdata.update(json.load(f))
+    except:
+        pass
+    # connect to github
+    print("Connecting...")
+    logger.debug("Connect to github")
+    github = Github(GITHUB_TOKEN)
+    repo = github.get_repo("alexregazzo/%s" % REPO_NAME)
+
+    # download files
+    logger.debug("Download starting")
+    contents = repo.get_contents("", BRANCH_NAME)
+    print("Downloading...")
+    version_file_path = None
+    while len(contents) > 0:
+        content_file = contents.pop(0)
+        logger.debug("Trying %s" % content_file.name)
+        if content_file.type == "dir":
+            logger.debug("Is folder: expanding")
+            contents.extend(repo.get_contents(content_file.path, BRANCH_NAME))
+            logger.debug("Expanded")
+        else:
+            path = os.path.join(INSTALL_DIRPATH, content_file.path)
+            directory, _ = os.path.split(path)
+            os.makedirs(directory, exist_ok=True)
+            logger.debug("Download content")
+            print("Downloading %s" % content_file.name)
+            for _ in range(3):
+                response = requests.get(content_file.download_url)
+                if response.status_code == 200:
+                    logger.debug("Request success")
+                    if content_file.name == "version.json":
+                        version_file_path = os.path.join(INSTALL_DIRPATH, content_file.path)
+                        userdata.update(json.loads(response.text))
+                        logger.debug("Found version file")
+                        break
+                    logger.debug("Write")
+                    with open(path, "w", encoding="utf8") as f:
+                        f.write(response.text)
+                    logger.debug("Write success on %s" % path)
+                    break
+                else:
+                    print("Error, retrying")
+                    logger.warning("Request error on file %s" % path)
+            else:
+                print("Failed on file %s" % content_file.path)
+                logger.critical("Error while downloading %s" % path)
+
+    # installing modules
+    logger.debug("Installing modules")
+    print("Installing modules")
+    os.system("pip install -r requirements.txt")
+    print("Finish installing modules")
+    logger.debug("Finished installing modules")
+    if version_file_path is None:
+        logger.critical("Version file not found")
+        logger.warning("Quitting!")
+        print("An error ocurred")
         os.system("pause")
         sys.exit(1)
-    else:
-        print("Salvo com sucesso")
-        print("Iniciando testes de conexão")
-        try:
-            dbname = database['database']['release']['database']
-            del database['database']['release']['database']
-            print("Inicio")
-            conn = mysql.connector.connect(**database["database"]["release"])
-            print("Sucesso 1/20")
-            cursor = conn.cursor()
-            print("Sucesso 2/20")
-            cursor.execute(f"DROP DATABASE IF EXISTS {dbname}")
-            print("Sucesso 3/20")
-            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {dbname}")
-            print("Sucesso 4/20")
-            conn.close()
-            print("Sucesso 5/20")
-            conn = mysql.connector.connect(**database["database"]["release"], database=dbname)
-            print("Sucesso 6/20")
-            cursor = conn.cursor()
-            print("Sucesso 7/20")
-            cursor.execute("drop table if exists testtable")
-            print("Sucesso 8/20")
-            cursor.execute("create table testtable(a int)")
-            print("Sucesso 9/20")
-            cursor.execute("insert into testtable(a)values (1)")
-            print("Sucesso 10/20")
-            cursor.execute("select * from testtable")
-            print("Sucesso 11/20")
-            test_data = cursor.fetchall()
-            print("Sucesso 12/20")
-            if len(test_data) == 1:
-                print("Sucesso 13/20")
-                if test_data[0] == (1,):
-                    print("Sucesso 14/20")
-                    cursor.execute("DROP TABLE testtable")
-                    print("Sucesso 15/20")
-                    conn.close()
-                    print("Sucesso 16/20")
-                    conn = mysql.connector.connect(**database["database"]["release"], database=dbname)
-                    print("Sucesso 17/20")
-                    cursor = conn.cursor()
-                    print("Sucesso 18/20")
-                    cursor.execute(f"DROP DATABASE IF EXISTS {dbname}")
-                    print("Sucesso 19/20")
-                    conn.close()
-                    print("Sucesso 20/20")
+    logger.debug("Download finished")
 
-                else:
-                    raise Exception("Wrong data")
-            else:
-                raise Exception("Wrong length")
-        except Exception as e:
-            print("Um erro ocorreu")
-            print(e)
+    logger.debug("Writing version file")
+    with open(version_file_path, "w", encoding="utf8") as f:
+        json.dump(userdata, f)
+    logger.debug("Writing done")
+
+
+def install():
+    # Initialize installation log
+    os.makedirs(os.path.join(INSTALLATION_LOG_DIRPATH), exist_ok=True)
+    logger = logging.getLogger("Setup")
+    logger.setLevel(logging.DEBUG)
+
+    for file_handler, level in [
+        (logging.FileHandler(os.path.join(INSTALLATION_LOG_DIRPATH, 'installation.log'), mode="w"), logging.DEBUG)
+    ]:
+        file_handler.setLevel(level)
+        file_handler.setFormatter(logging.Formatter(LOG_FORMAT))
+        logger.addHandler(file_handler)
+    logger.debug("-" * 50)
+    logger.debug("Installation")
+
+    # User Data save
+    userdata = {}
+    try:
+        # show whats needed and confirm
+        print("Welcome to Downloader setup")
+        print("You need to have:")
+        print("\t- utorrent installed on your machine")
+        print("\t- API KEY from The Movie Database (https://www.themoviedb.org/)")
+        print("\t- Some python modules (installed on this setup)")
+        print("Notice: the program files will be located in the same folder of this setup")
+        if input("Would you like to continue?[y/n]").lower() != "y":
+            logger.debug("Quit by user")
+            print("Quitting...")
             os.system("pause")
-            sys.exit(1)
-print("Setup finalizado")
-os.system("pause")
+            sys.exit(0)
+        logger.debug("Starting")
+        print("Starting...")
+
+        # user database setup
+        logger.debug("Setup database started")
+        userdata.update(
+            {
+                "TMDB": {
+                    "TMDB_KEY": input("Insert the API key from The Movie Database: ")
+                }
+            })
+
+        _install(logger, userdata)
+        logger.debug("Finished installation")
+        print("Installation finished successfully")
+        os.system("pause")
+        sys.exit(0)
+
+    except Exception as e:
+        logger.exception("Non expected exception ocurred")
+        print("An error ocurred during installation, rerun or contact the developer.")
+        print(e)
+        os.system("pause")
+
+
+def check_update():
+    """
+    Compare installed version with remote version to check if there are updates
+    :return: UPDATE_* definition based on the available update
+    """
+
+    logger = logging.getLogger("Program.{}".format("check_update"))
+    try:
+        # Get local installed version
+        with open("version.json") as f:
+            version = json.load(f)
+        local_version = version["version"]
+        logger.debug("Local version found: %s" % local_version)
+        # Get remote version
+
+        from github import Github
+
+        github = Github(GITHUB_TOKEN)
+        repo = github.get_repo("alexregazzo/%s" % REPO_NAME)
+        remote_version_data = None
+        try:
+            content_file = repo.get_contents("version.json", BRANCH_NAME)
+            response = requests.get(content_file.download_url)
+            if response.status_code == 200:
+                remote_version_data = json.loads(response.text)
+        except:
+            logger.exception("Unexpected exception ocurred while trying to get version file from github")
+            return UPDATE_NONE
+
+        if remote_version_data is None:
+            logger.critical("Could not get version file")
+            return UPDATE_NONE
+        remote_version = remote_version_data['version']
+        logger.debug("Remote version found: %s" % remote_version)
+        # compare versions
+        # version: X.Y.Z
+        # X - major
+        # Y - minor
+        # Z - Bugfix / patch
+
+        for k, (lv, rv) in enumerate(zip(local_version.split("."), remote_version.split("."))):
+            lv = int(lv)
+            rv = int(rv)
+            if rv > lv:
+                if k == 0:  # major
+                    logger.debug("Major update")
+                    return UPDATE_MAJOR
+                elif k == 1:  # minor
+                    logger.debug("Minor update")
+                    return UPDATE_MINOR
+                elif k == 2:  # patch/bugfix
+                    logger.debug("Patch/bugfix update")
+                    return UPDATE_PATCH_OR_BUG_FIX
+                else:
+                    raise NotImplementedError("Something went wrong on versions comparisons comparison - local: %s, remote: %s" % (local_version, remote_version))
+        logger.debug("No update")
+        return UPDATE_NONE
+    except:
+        logger.exception("An exception ocurred while trying to execute check updates")
+        return UPDATE_NONE
+
+
+def update():
+    logger = logging.getLogger("Program.{}".format("update"))
+    logger.debug("Updating")
+    try:
+
+        _install(logger)
+        logger.debug("Finished updating")
+        print("Updating finished successfully")
+        print("Reopen Downloader to continue")
+        os.system("pause")
+        return
+    except:
+        logger.exception("An unexpeced error ocurred while trying to update")
+
+
+if __name__ == "__main__":
+    install()

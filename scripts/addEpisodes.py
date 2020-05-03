@@ -1,8 +1,6 @@
 import logging
-import database as db
-import TMDB
+from scripts import TMDB, utils, database as db
 import time
-import utils
 
 
 def run():

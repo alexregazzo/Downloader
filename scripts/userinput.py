@@ -1,8 +1,8 @@
 import logging
-import utils
-import database as db
-import TMDB
+from scripts import TMDB, utils, settings, database as db
 import datetime
+
+DATETIME_FORMAT = settings.DATETIME_FORMAT
 
 
 def getSerie():
@@ -18,7 +18,8 @@ def getSerie():
     print("Séries disponíveis:")
     for k, tvshow in enumerate(tvshows):
         print("%d - %s" % (k + 1, tvshow["ser_nome"]),
-              "*" if tvshow["ser_firstadd"] == 1 else "** -> %s" % tvshow["ser_uatualizado"].strftime("%d-%m-%Y %H:%M:%S") if (datetime.datetime.now() - tvshow["ser_uatualizado"]) > datetime.timedelta(hours=3) else "")
+              "*" if tvshow["ser_firstadd"] == 1 else "** -> %s" % tvshow["ser_uatualizado"] if (datetime.datetime.now() - datetime.datetime.strptime(tvshow["ser_uatualizado"], DATETIME_FORMAT)) > datetime.timedelta(
+                  hours=3) else "")
     print("* não finalizou primeira adição")
     print("** não foi atualizado recentemente")
     try:

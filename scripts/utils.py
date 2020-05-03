@@ -1,5 +1,6 @@
 import os
 import re
+from unicodedata import normalize
 
 
 def clear():
@@ -34,9 +35,6 @@ def dictInList(dictionary, array, keys_to_compare=None):
 
 def removeProblematicChars(string):
     return string.replace("'", "")
-
-
-from unicodedata import normalize
 
 
 def remove_non_ascii(txt):

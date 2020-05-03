@@ -1,0 +1,6 @@
+{
+  "LOGGING_DIRPATH": "../logs",
+  "DATABASE_DIRPATH": "../",
+  "SQL_DIRPATH": "./",
+  "VERSION_DIRPATH" : "../"
+}
