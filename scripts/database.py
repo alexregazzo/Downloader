@@ -53,16 +53,17 @@ class Database:
                 self.conn.commit()
 
     def delete(self, query):
-        try:
-            self.cursor.execute(query)
-        except:
-            self.logger.exception("An exception ocurred while deleting")
-            self.logger.critical("QUERY: %s" % query)
-            return False
-        else:
-            return True
-        finally:
-            self.conn.commit()
+        with self.lock:
+            try:
+                self.cursor.execute(query)
+            except:
+                self.logger.exception("An exception ocurred while deleting")
+                self.logger.critical("QUERY: %s" % query)
+                return False
+            else:
+                return True
+            finally:
+                self.conn.commit()
 
     def update(self, query):
         with self.lock:
@@ -125,7 +126,7 @@ class Database:
         :return: whether the operation was performed sucessfully
         """
         ser_nome = ser_nome.replace("'", "")
-        QUERY = f"INSERT INTO serie (ser_id, ser_nome) VALUES ('{ser_id}', '{ser_nome}')"
+        QUERY = f"INSERT INTO serie (ser_id, ser_nome, ser_adicionado) VALUES ('{ser_id}', '{ser_nome}', '{datetime.datetime.now().strftime(DATETIME_FORMAT)}')"
         return self.insert(QUERY)
 
     # -----------------------------------------------------------------------------------
@@ -212,7 +213,7 @@ class Database:
         Add episode to database
         :return: whether the operation was performed sucessfully
         """
-        QUERY = f"INSERT INTO episodio (ser_id, epi_temporada, epi_episodio, epi_lancamento, epi_baixar) VALUES ('{ser_id}', '{epi_temporada}', '{epi_episodio}', '{epi_lancamento}',  (SELECT !ser_firstadd FROM serie WHERE ser_id = '{ser_id}'))"
+        QUERY = f"INSERT INTO episodio (ser_id, epi_temporada, epi_episodio, epi_lancamento, epi_baixar, epi_adicionado) VALUES ('{ser_id}', '{epi_temporada}', '{epi_episodio}', '{epi_lancamento}',  (SELECT not ser_firstadd FROM serie WHERE ser_id = '{ser_id}'), '{datetime.datetime.now().strftime(DATETIME_FORMAT)}')"
         return self.insert(QUERY)
 
     # -----------------------------------------------------------------------------------
@@ -271,7 +272,7 @@ class Database:
         Add link to link to database
         :return: whether the operation was performed sucessfully
         """
-        QUERY = f"INSERT INTO link (ser_id, epi_temporada, epi_episodio, lin_nome, lin_link) VALUES ('{ser_id}', '{epi_temporada}', '{epi_episodio}', '{lin_nome}', '{lin_link}')"
+        QUERY = f"INSERT INTO link (ser_id, epi_temporada, epi_episodio, lin_nome, lin_link, lin_adicionado) VALUES ('{ser_id}', '{epi_temporada}', '{epi_episodio}', '{lin_nome}', '{lin_link}', '{datetime.datetime.now().strftime(DATETIME_FORMAT)}')"
         return self.insert(QUERY)
 
     # -----------------------------------------------------------------------------------
