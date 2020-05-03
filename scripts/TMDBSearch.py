@@ -11,7 +11,7 @@ VERSION_PATH = os.path.join(VERSION_DIRPATH, "version.json")
 class TMDBSearch:
     def __init__(self):
         with open(VERSION_PATH) as f:
-            tmdb_data = json.load(f)
+            tmdb_data = json.load(f)['TMDB']
         self.API_KEY = tmdb_data['TMDB_KEY']
 
     def SearchTVShow(self, query: str):
