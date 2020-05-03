@@ -58,7 +58,7 @@ class TMDB:
                 try:
                     self._data = json.load(f)
                 except Exception as e:
-                    self.logger.warning("Error while loading TPB cache\n\n%s" % e)
+                    self.logger.warning("Problem while loading TPB cache\n\n%s" % e)
                     self._data = {}
 
     def _get(self, tp: str, *args, getAnyway: bool = False):

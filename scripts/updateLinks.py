@@ -1,7 +1,9 @@
 import logging
-from scripts import TPB, KAT, utils, database as db
+from scripts import TPB, KAT, utils, settings, database as db
 import time
 import datetime
+
+DATETIME_FORMAT = settings.DATETIME_FORMAT
 
 
 def run():
@@ -14,7 +16,7 @@ def run():
         episodes = database.getToDownloadEpisodeWithoutLink()  # [dict_keys(ser_id, ser_nome, epi_temporada, epi_episodio, epi_uatualizacao)]
         for episode in episodes:
             # print(episode, (datetime.datetime.now() - episode['epi_uatualizacao']), datetime.timedelta(hours=3) > (datetime.datetime.now() - episode['epi_uatualizacao']))
-            if datetime.timedelta(hours=3) > (datetime.datetime.now() - episode['epi_uatualizacao']):
+            if datetime.timedelta(hours=3) > (datetime.datetime.now() - datetime.datetime.strptime(episode['epi_uatualizacao'], DATETIME_FORMAT)):
                 continue
             search_results = None
             searchtpb = None
@@ -42,7 +44,7 @@ def run():
                     if utils.match(name1=name1, name2=name2):
                         database.addLink(episode['ser_id'], episode['epi_temporada'], episode['epi_episodio'], match['name'], match['magnet'])
                     else:
-                        logger.debug(f"Link did not match episode: {name1} {name2}")
+                        logger.debug(f"Link did not match episode: {name1} \t\t\t\t {name2}")
 
             if not database.setEpisodeUpdated(episode['ser_id'], episode['epi_temporada'], episode['epi_episodio']):
                 logger.warning("%s %s %s - PROBLEM" % (episode['ser_nome'], episode['epi_temporada'], episode['epi_episodio']))

@@ -150,7 +150,7 @@ def recentlyadded():
         return
     print("Episódios adicionados nas ultimas 3 horas")
     for episodio in episodios:
-        print("{: <{width}} S{:02}E{:02}   {}".format(episodio["ser_nome"], episodio["epi_temporada"], episodio["epi_episodio"], episodio["epi_adicionado"].strftime("%d-%m-%Y %H:%M:%S"),
+        print("{: <{width}} S{:02}E{:02}   {}".format(episodio["ser_nome"], episodio["epi_temporada"], episodio["epi_episodio"], episodio["epi_adicionado"],
                                                       width=size[1] + 2))
     utils.pause()
 
@@ -171,7 +171,7 @@ def lastadded():
         return
     print("Ultimos {} episódios adicionados".format(len(episodios)))
     for episodio in episodios:
-        print("{: <{width}} S{:02}E{:02}   {}".format(episodio["ser_nome"], episodio["epi_temporada"], episodio["epi_episodio"], episodio["epi_adicionado"].strftime("%d-%m-%Y %H:%M:%S"),
+        print("{: <{width}} S{:02}E{:02}   {}".format(episodio["ser_nome"], episodio["epi_temporada"], episodio["epi_episodio"], episodio["epi_adicionado"],
                                                       width=size[1] + 2))
     utils.pause()
 
