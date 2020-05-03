@@ -4,15 +4,20 @@ download series' episodes to be watched.
 
 ## How to use
 - **Clone** the git repository
-- <a href="https://raw.githubusercontent.com/alexregazzo/Downloader/organize/setup.py" download>Download</a> and run **setup**
-- Run **main** whenever you want the program to run 
+- [Download](https://raw.githubusercontent.com/alexregazzo/Downloader/organize/setup.py) and run **setup**
+> By clicking the 'download' button you will be redirected to the github page that contains that file, save it by pressing ctrl + s
+- Run **main** whenever you want the program to run
 
 #### Requirements:
+* [Python](https://www.python.org/downloads/) version >= 3.8
 * Connection to the internet
 * Some python packages listed on [requirements.txt](./requirements.txt)
-* [Mysql server](https://dev.mysql.com/downloads/mysql/) installed locally (can run remotely if configured)
 * API key from [TMDB](https://www.themoviedb.org/settings/api)
-* [uTorrent](https://www.utorrent.com/intl/pt/downloads/win_us) (current version (v2.0) might work on other torrent clients (might change on later updates)) 
+* [uTorrent](https://www.utorrent.com/intl/pt/downloads/win_us) (current version (v2.0) might work on other torrent clients (might change on later updates))
+
+### v3.0 new features
+- No longer support mysqlserver (all on sqlite3) so database setup is required
+- Setup which allows installation and updates
 
 ### v2.0 new features
 - User features:
