@@ -13,4 +13,5 @@
 - README.md
 - version.json
 - index.html [workflow]
+- database.db
 - main.py [main will run setup if needed]

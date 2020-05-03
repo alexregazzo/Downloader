@@ -2,6 +2,7 @@ import requests
 from urllib.parse import quote
 import json
 
+
 class TMDBSearch:
     def __init__(self):
         with open("userconfig/tmdb.json") as f:

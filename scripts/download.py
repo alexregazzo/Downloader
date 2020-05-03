@@ -1,5 +1,5 @@
 import logging
-import database as db
+from scripts import database as db
 import os
 import time
 

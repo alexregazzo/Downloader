@@ -1,9 +1,8 @@
-import json
 import os
 import threading
 import time
 from hashlib import md5 as hashing
-from TMDBSearch import *
+from scripts.TMDBSearch import *
 import logging
 
 

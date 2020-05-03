@@ -1,10 +1,7 @@
 import logging
-import database as db
-import TPB
-import KAT
+from scripts import TPB, KAT, utils, database as db
 import time
 import datetime
-import utils
 
 
 def run():
@@ -43,7 +40,7 @@ def run():
                     name1 = match['name']
                     name2 = f"{episode['ser_nome']} s{int(episode['epi_temporada']):02}e{int(episode['epi_episodio']):02}"
                     if utils.match(name1=name1, name2=name2):
-                        database.addLink(episode['ser_id'], episode['epi_temporada'], episode['epi_episodio'], match['name'], match['magnet'], match['seeders'])
+                        database.addLink(episode['ser_id'], episode['epi_temporada'], episode['epi_episodio'], match['name'], match['magnet'])
                     else:
                         logger.debug(f"Link did not match episode: {name1} {name2}")
 

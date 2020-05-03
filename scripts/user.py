@@ -1,10 +1,7 @@
 import logging
-import utils
 import shutil
 import os
-import database as db
-import TMDB
-import userinput
+from scripts import TMDB, userinput, utils, settings, database as db
 import datetime
 
 
@@ -246,7 +243,7 @@ def print_to_download():
     print("Episódios aguardando link:")
     tamanho_min, tamanho_max = database.getMinMaxSizeOfSerieNames()
     for episode in episodes:
-        next_update = datetime.timedelta(hours=3) - (datetime.datetime.now() - episode['epi_uatualizacao'])
+        next_update = datetime.timedelta(hours=3) - (datetime.datetime.now() - datetime.datetime.strptime(episode['epi_uatualizacao'], settings.DATETIME_FORMAT))
         if next_update.total_seconds() < 0:
             next_update = datetime.timedelta(seconds=0)
         next_update_s = str(int(next_update.seconds % 60)).rjust(2, '0')

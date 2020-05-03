@@ -1,89 +1,64 @@
 import logging
-import mysql.connector
 import datetime
-import settings
+from scripts import settings
+import sqlite3
+import threading
+import os
+
+DATABASE_NAME = "data.db"
+DATABASE_DIR = settings.ABSOLUTE_PATHS['DATABASE_DIRPATH']
+DATETIME_FORMAT = settings.DATETIME_FORMAT
+SQL_NAME = "tables.sql"
+SQL_PATH = os.path.join(settings.ABSOLUTE_PATHS['SQL_DIRPATH'],SQL_NAME)
 
 
 class Database:
-    def __init__(self, autoLoad=True):
-        self.logger = logging.getLogger("Program.{}".format(__name__))
+    logger = logging.getLogger("Program.{}".format(__name__))
+    lock = threading.RLock()
+    with lock:
+        conn = sqlite3.connect(os.path.join(DATABASE_DIR, DATABASE_NAME), check_same_thread=False)
+        conn.row_factory = lambda c, r: dict([(col[0], r[idx]) for idx, col in enumerate(c.description)])
+
+    def __init__(self):
         self.logger.info("Database initiated!")
-        self.mydb = None
-        if autoLoad:
-            self.load()
+        self.cursor = self.conn.cursor()
+        self.cursor.execute("PRAGMA foreign_keys = ON")
+        self.create_tables()
 
     def create_tables(self):
-        databasesettings = {**settings.DATABASE}
-        del databasesettings['database']
-        databasename = settings.DATABASE['database']
-        try:
-            mydb = mysql.connector.connect(**databasesettings)
-            cursor = mydb.cursor()
-            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {databasename}")
-        except:
-            self.logger.exception("Exception ocurred while trying to creating database")
-            return
-        else:
-            mydb.commit()
-        try:
-            self.load()
-            cursor = self.mydb.cursor()
-            with open("sql/create_tables_windows.sql") as f:
-                for table in f.read().split(";"):
-                    cursor.execute(table)
-        except:
-            self.logger.exception("Exception ocurred while trying to add tables")
-            return
-        else:
-            self.mydb.commit()
-
-    def load(self):
-        try:
-            self.mydb = mysql.connector.connect(**settings.DATABASE)
-        except:
-            self.logger.exception("An exception ocurred")
-            self.mydb = None
+        with self.lock:
+            with open(SQL_PATH) as f:
+                self.cursor.executescript(f.read())
+            self.conn.commit()
 
     def insert(self, query):
-        if self.mydb is None:
-            self.logger.critical("Database is None")
-            return False
-        mycursor = self.mydb.cursor()
-        try:
-            mycursor.execute(query)
-        except:
-            self.logger.exception("An exception ocurred while inserting an object", stack_info=True)
-            self.logger.critical("QUERY: %s" % query)
-            return False
-        else:
-            return True
-        finally:
-            self.mydb.commit()
-            mycursor.close()
+        with self.lock:
+            try:
+                self.cursor.execute(query)
+            except:
+                self.logger.exception("An exception ocurred while inserting an object", stack_info=True)
+                self.logger.critical("QUERY: %s" % query)
+                return False
+            else:
+                return True
+            finally:
+                self.conn.commit()
 
     def select(self, query):
-        if self.mydb is None:
-            self.logger.critical("Database is None")
-            return []
-        mycursor = self.mydb.cursor(dictionary=True)
-        try:
-            mycursor.execute(query)
-        except:
-            self.logger.exception("An exception ocurred while selecting")
-            return []
-        else:
-            return list(mycursor)
-        finally:
-            self.mydb.commit()
-            mycursor.close()
+        with self.lock:
+            try:
+                self.cursor.execute(query)
+            except:
+                self.logger.exception("An exception ocurred while selecting")
+                return []
+            else:
+                return self.cursor.fetchall()
+            finally:
+                self.conn.commit()
 
     def delete(self, query):
-        if self.mydb is None:
-            self.logger.critical("Database is None")
-            return False
-        mycursor = self.mydb.cursor()
         try:
-            mycursor.execute(query)
+            self.cursor.execute(query)
         except:
             self.logger.exception("An exception ocurred while deleting")
             self.logger.critical("QUERY: %s" % query)
@@ -91,25 +66,20 @@ class Database:
         else:
             return True
         finally:
-            self.mydb.commit()
-            mycursor.close()
+            self.conn.commit()
 
     def update(self, query):
-        if self.mydb is None:
-            self.logger.critical("Database is None")
-            return False
-        mycursor = self.mydb.cursor()
-        try:
-            mycursor.execute(query)
-        except:
-            self.logger.exception("An exception ocurred while updating")
-            self.logger.critical("QUERY: %s" % query)
-            return False
-        else:
-            return True
-        finally:
-            self.mydb.commit()
-            mycursor.close()
+        with self.lock:
+            try:
+                self.cursor.execute(query)
+            except:
+                self.logger.exception("An exception ocurred while updating")
+                self.logger.critical("QUERY: %s" % query)
+                return False
+            else:
+                return True
+            finally:
+                self.conn.commit()
 
     # -----------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------
@@ -122,9 +92,7 @@ class Database:
         Get series that weren't updated in the last 3 (default) hours
         :return: [dict_keys(ser_id), ... ]
         """
-        QUERY = "SELECT ser_id FROM serie WHERE ser_uatualizado <= '%s'" % (
-                datetime.datetime.now() - datetime.timedelta(hours=hours)).strftime(
-            "%Y-%m-%d %H:%M:%S")
+        QUERY = "SELECT ser_id FROM serie WHERE ser_uatualizado <= '%s'" % (datetime.datetime.now() - datetime.timedelta(hours=hours)).strftime(DATETIME_FORMAT)
         return self.select(QUERY)
 
     def getAllSeries(self) -> [dict]:
@@ -172,7 +140,7 @@ class Database:
         Set serie as updated with curernt time
         :return: whether the operation was performed sucessfully
         """
-        QUERY = f"UPDATE serie SET ser_uatualizado = CURRENT_TIMESTAMP, ser_firstadd = 0 WHERE ser_id = '{ser_id}'"
+        QUERY = f"UPDATE serie SET ser_uatualizado = '{datetime.datetime.now().strftime(DATETIME_FORMAT)}', ser_firstadd = 0 WHERE ser_id = '{ser_id}'"
         return self.update(QUERY)
 
     # -----------------------------------------------------------------------------------
@@ -221,7 +189,7 @@ class Database:
         :return: [dict_keys(ser_nome, epi_temporada, epi_episodio, epi_adicionado), ... ]
         """
         QUERY = "SELECT ser_nome, epi_temporada, epi_episodio, epi_adicionado FROM episodio JOIN serie WHERE epi_adicionado > '%s' ORDER BY epi_adicionado DESC" % (
-                datetime.datetime.now() - datetime.timedelta(hours=hours)).strftime("%Y-%m-%d %H:%M:%S")
+                datetime.datetime.now() - datetime.timedelta(hours=hours)).strftime(DATETIME_FORMAT)
         return self.select(QUERY)
 
     def getLastAddedEpisodes(self, amount=10) -> [dict]:
@@ -268,7 +236,7 @@ class Database:
         Set episode as updated with the current time
         :return: whether the operation was performed sucessfully
         """
-        QUERY = f"UPDATE episodio SET epi_uatualizacao = CURRENT_TIMESTAMP WHERE ser_id = '{ser_id}' AND epi_temporada = '{epi_temporada}' AND epi_episodio = '{epi_episodio}'"
+        QUERY = f"UPDATE episodio SET epi_uatualizacao = '{datetime.datetime.now().strftime(DATETIME_FORMAT)}' WHERE ser_id = '{ser_id}' AND epi_temporada = '{epi_temporada}' AND epi_episodio = '{epi_episodio}'"
         return self.update(QUERY)
 
     def setToDownloadAfterEpisode(self, ser_id, epi_temporada, epi_episodio) -> bool:
@@ -302,13 +270,12 @@ class Database:
     # -----------------------------------------------------------------------------------
     #           Link INSERT
     # -----------------------------------------------------------------------------------
-    def addLink(self, ser_id, epi_temporada, epi_episodio, lin_nome, lin_link, lin_popularidade=None) -> bool:
+    def addLink(self, ser_id, epi_temporada, epi_episodio, lin_nome, lin_link) -> bool:
         """
         Add link to link to database
         :return: whether the operation was performed sucessfully
         """
-        lin_popularidade = "NULL" if lin_popularidade is None else lin_popularidade
-        QUERY = f"INSERT INTO link (ser_id, epi_temporada, epi_episodio, lin_nome, lin_link, lin_popularidade) VALUES ('{ser_id}', '{epi_temporada}', '{epi_episodio}', '{lin_nome}', '{lin_link}', '{lin_popularidade}')"
+        QUERY = f"INSERT INTO link (ser_id, epi_temporada, epi_episodio, lin_nome, lin_link) VALUES ('{ser_id}', '{epi_temporada}', '{epi_episodio}', '{lin_nome}', '{lin_link}')"
         return self.insert(QUERY)
 
     # -----------------------------------------------------------------------------------
@@ -328,5 +295,6 @@ class Database:
 
 
 if __name__ == "__main__":
-    db = Database()
-    print(db.getToDownloadEpisodeWithoutLink())
+    pass
+    # db = Database()
+    # print(db.getToDownloadEpisodeWithoutLink())

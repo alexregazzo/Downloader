@@ -1,0 +1,5 @@
+{
+  "LOGGING_DIRPATH": "../logs",
+  "DATABASE_DIRPATH": "../",
+  "SQL_DIRPATH": "./"
+}

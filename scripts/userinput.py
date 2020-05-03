@@ -1,7 +1,5 @@
 import logging
-import utils
-import database as db
-import TMDB
+from scripts import TMDB, utils, database as db
 import datetime
 
 
