@@ -63,10 +63,13 @@ def removeSerie():
         except ValueError:
             pass
         else:
+            logger.debug(f"Trying to remove: {series[op - 1]['ser_id']}")
             if database.removeSerie(series[op - 1]["ser_id"]):
                 print("Série removida com sucesso")
+                logger.debug("Removed")
             else:
                 print("Houve algum erro durante a remoção!")
+                logger.warning("Problem on removing")
     utils.pause()
 
 
