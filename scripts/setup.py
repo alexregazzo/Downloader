@@ -13,7 +13,7 @@ BRANCH_NAME = "master"
 INSTALL_DIRPATH = "."
 # log
 INSTALLATION_LOG_DIRPATH = "."
-LOG_FORMAT = "%(asctime)s - %(levelname)s - %(lineno)d :: %(message)s"
+LOG_FORMAT = "%(asctime)s - %(levelname)s :: (%(threadName)-9s) :: %(name)s  %(lineno)d :: %(message)s"
 # updates
 UPDATE_NONE = 0
 UPDATE_PATCH_OR_BUG_FIX = 1
@@ -206,6 +206,7 @@ def check_update():
     Compare installed version with remote version to check if there are updates
     :return: UPDATE_* definition based on the available update
     """
+
     logger = logging.getLogger("Program.{}".format("check_update"))
     try:
         # Get local installed version
@@ -213,7 +214,7 @@ def check_update():
             version = json.load(f)
         local_version = version["version"]
         logger.debug("Local version found: %s" % local_version)
-
+        print(True)
         # Get remote version
 
         from github import Github
@@ -224,6 +225,7 @@ def check_update():
         try:
             content_file = repo.get_contents("version.json", BRANCH_NAME)
             response = requests.get(content_file.download_url)
+            print(response.status_code)
             if response.status_code == 200:
                 remote_version_data = json.loads(response.text)
         except:
