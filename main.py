@@ -3,7 +3,8 @@ import threading
 import os
 import sys
 import json
-from scripts import settings, setup
+from scripts import settings
+import setup
 
 LOG_FORMAT = settings.LOG_FORMAT
 logger = logging.getLogger("Program")

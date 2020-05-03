@@ -2,7 +2,6 @@
     - config/
         - general.json
     - program files *.py
-    - setup.py
     - sqltablessqlite.sql
 - config/
     - tmdb.json
@@ -13,5 +12,6 @@
 - README.md
 - version.json
 - index.html [workflow]
-- database.db
+- data.db
+- setup.py
 - main.py [main will run setup if needed]
