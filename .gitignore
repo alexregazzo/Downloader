@@ -6,7 +6,8 @@
 **/cache/
 **/*.pyc
 **/*.db
+**/*teste*
 userconfig/*.*
 !config.json
 
-logs/teste.py
+
