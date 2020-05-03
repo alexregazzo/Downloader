@@ -102,7 +102,7 @@ def install():
                             logger.debug("Found version file")
                             break
                         logger.debug("Write")
-                        with open(path, "w") as f:
+                        with open(path, "w", encoding="utf8") as f:
                             f.write(response.text)
                         logger.debug("Write success on %s" % path)
                         break
@@ -138,7 +138,7 @@ def install():
 
         logger.debug("Config finished")
         logger.debug("Writing version file")
-        with open(version_file_path, "w") as f:
+        with open(version_file_path, "w", encoding="utf8") as f:
             json.dump(userdata, f)
         logger.debug("Writing done")
 
@@ -328,7 +328,7 @@ def update():
         for file in all_files:
             logger.debug("Writting %s" % file['path'])
             print("Writting %s" % file['path'])
-            with open(file['path'], 'w') as f:
+            with open(file['path'], 'w', encoding="utf8") as f:
                 f.write(file['content'])
             logger.debug("Success")
         logger.debug("Writting done")
