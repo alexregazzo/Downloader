@@ -48,12 +48,6 @@ def install():
         print("\t- utorrent installed on your machine")
         print("\t- API KEY from The Movie Database (https://www.themoviedb.org/)")
         print("\t- Some python modules (installed on this setup)")
-        print("For the database you have 2 options:")
-        print("\t- MySQLServer")
-        print("\t\t+ Needs:")
-        print("\t\t\t* Server installed")
-        print("\t\t\t* Access to host, username, and password")
-        print("\t- SQLITE3 (native python module)")
         print("Notice: the program files will be located in the same folder of this setup")
         if input("Would you like to continue?[y/n]").lower() != "y":
             logger.debug("Quit by user")
@@ -141,48 +135,7 @@ def install():
                     "TMDB_KEY": input("Insert the API key from The Movie Database: ")
                 }
             })
-        while True:
-            try:
-                print("Choose the type of database you'd like to use:")
-                print("1 - MYSQLServer (advanced)")
-                print("2 - SQLITE (recommended)")
-                choice = int(input("Enter the number:"))
-                if choice != 1 and choice != 2:
-                    raise ValueError
-            except ValueError:
-                pass
-            else:
-                break
-        if choice == 1:  # MYSQLSERVER
-            logger.debug("MYSQLSERVER chosen")
-            print("Setup MYSQLServer:")
-            userdata.update(
-                {
-                    "DATABASE": {
-                        "type": "mysqlserver",
-                        "connection":
-                            {
-                                "host": input("Enter server host (ex: localhost): "),
-                                "user": input("Enter user (ex: root): "),
-                                "passwd": input("Enter password: "),
-                                "database": "series"
-                            }
-                    }
-                })
-            # TODO: test mysqlserver
-        elif choice == 2:  # SQLITE3
-            logger.debug("SQLITE chosen")
-            userdata.update(
-                {
-                    "DATABASE": {
-                        "type": "sqlite",
-                        "connection":
-                            {
-                                "database": "series"
-                            }
-                    }
-                })
-            # TODO: test sqlite
+
         logger.debug("Config finished")
         logger.debug("Writing version file")
         with open(version_file_path, "w") as f:
