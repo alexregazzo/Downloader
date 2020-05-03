@@ -5,7 +5,7 @@ from scripts import settings
 import os
 
 VERSION_DIRPATH = settings.ABSOLUTE_PATHS['VERSION_DIRPATH']
-VERSION_PATH = os.path.join("version.json", VERSION_DIRPATH)
+VERSION_PATH = os.path.join(VERSION_DIRPATH, "version.json")
 
 
 class TMDBSearch:
