@@ -1,6 +1,7 @@
 import os
 import json
 
+LOG_FORMAT = "%(asctime)s - %(levelname)s :: (%(threadName)-9s) :: %(name)s  %(lineno)d :: %(message)s"
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 CURRENT_DIR = os.path.dirname(__file__)
 DEVELOMENT_MODE = ".testing" in os.listdir("./..")

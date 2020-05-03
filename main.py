@@ -3,7 +3,7 @@ import threading
 import os
 from scripts import settings, database
 
-LOG_FORMAT = "%(asctime)s - %(levelname)s :: (%(threadName)-9s) :: %(name)s  %(lineno)d :: %(message)s"
+LOG_FORMAT = settings.LOG_FORMAT
 logger = logging.getLogger("Program")
 logger.setLevel(logging.DEBUG)
 LOGGING_MODE = "a" if not settings.DEVELOMENT_MODE else "w"
