@@ -4,7 +4,7 @@ import json
 LOG_FORMAT = "%(asctime)s - %(levelname)s :: (%(threadName)-9s) :: %(name)s  %(lineno)d :: %(message)s"
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 CURRENT_DIR = os.path.dirname(__file__)
-DEVELOMENT_MODE = ".testing" in os.listdir("./..")
+DEVELOMENT_MODE = ".testing" in os.listdir(os.path.join(CURRENT_DIR, "./.."))
 with open(os.path.join(CURRENT_DIR, "config/relative-paths.json")) as f:
     RELATIVE_PATHS = json.load(f)
 
