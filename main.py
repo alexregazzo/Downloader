@@ -63,7 +63,7 @@ if update != setup.UPDATE_NONE:
         print("There is a MINOR update available")
     elif update == setup.UPDATE_PATCH_OR_BUG_FIX:
         print("There is a bug fix or patch update available")
-    if input(f"Would you like to update {f'from {setup.LOCAL_VERSION} ' if setup.LOCAL_VERSION else ''} {f'to {setup.REMOTE_VERSION}' if setup.REMOTE_VERSION else ''} ? [y/n]").lower() == "y":
+    if input(f"Would you like to update{f' from {setup.LOCAL_VERSION}' if setup.LOCAL_VERSION else ''} {f' to {setup.REMOTE_VERSION}' if setup.REMOTE_VERSION else ''}? [y/n]").lower() == "y":
         setup.update()
         sys.exit(0)
 
