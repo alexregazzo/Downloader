@@ -21,9 +21,10 @@ UPDATE_NONE = 0
 UPDATE_PATCH_OR_BUG_FIX = 1
 UPDATE_MINOR = 2
 UPDATE_MAJOR = 3
-
-
 # --------------------------------------------------------------------------------------
+
+REMOTE_VERSION = None
+LOCAL_VERSION = None
 
 
 def _install(logger, userdata=None):
@@ -194,6 +195,7 @@ def check_update():
         with open("version.json") as f:
             version = json.load(f)
         local_version = version["version"]
+        LOCAL_VERSION = local_version
         logger.debug("Local version found: %s" % local_version)
         # Get remote version
 
@@ -215,6 +217,7 @@ def check_update():
             logger.critical("Could not get version file")
             return UPDATE_NONE
         remote_version = remote_version_data['version']
+        REMOTE_VERSION = remote_version
         logger.debug("Remote version found: %s" % remote_version)
         # compare versions
         # version: X.Y.Z
