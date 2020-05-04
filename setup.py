@@ -8,9 +8,11 @@ import json
 # DEFINITIONS
 # github
 GITHUB_TOKEN = "b30a3c77f56f8c39047b00f1aa232bf6ddcd3e2a"
+OWNER = "alexregazzo"
 REPO_NAME = "Downloader"
 BRANCH_NAME = "master"
 INSTALL_DIRPATH = "."
+
 # log
 INSTALLATION_LOG_DIRPATH = "."
 LOG_FORMAT = "%(asctime)s - %(levelname)s :: (%(threadName)-9s) :: %(name)s  %(lineno)d :: %(message)s"
@@ -47,13 +49,14 @@ def _install(logger, userdata=None):
     print("Connecting...")
     logger.debug("Connect to github")
     github = Github(GITHUB_TOKEN)
-    repo = github.get_repo("alexregazzo/%s" % REPO_NAME)
+    repo = github.get_repo(f"{OWNER}/{REPO_NAME}")
 
     # download files
     logger.debug("Download starting")
     contents = repo.get_contents("", BRANCH_NAME)
     print("Downloading...")
     version_file_path = None
+    memory_content = {}
     while len(contents) > 0:
         content_file = contents.pop(0)
         logger.debug("Trying %s" % content_file.name)
@@ -76,9 +79,8 @@ def _install(logger, userdata=None):
                         userdata.update(json.loads(response.text))
                         logger.debug("Found version file")
                         break
-                    logger.debug("Write")
-                    with open(path, "w", encoding="utf8") as f:
-                        f.write(response.text)
+                    logger.debug("Write to memory")
+                    memory_content[path] = response.text
                     logger.debug("Write success on %s" % path)
                     break
                 else:
@@ -86,7 +88,25 @@ def _install(logger, userdata=None):
                     logger.warning("Request error on file %s" % path)
             else:
                 print("Failed on file %s" % content_file.path)
+                print("Operation cancelled!")
                 logger.critical("Error while downloading %s" % path)
+                os.system("pause")
+                sys.exit(1)
+    logger.debug("All files done writting to memory")
+    logger.debug("Write to disk")
+    print("Writting to disk")
+    try:
+        for path, content in memory_content.items():
+            print(f"Writting {path}")
+            logger.debug(f"Writting {path}")
+            with open(path, "w", encoding="utf8") as f:
+                f.write(content)
+            logger.debug("Done")
+    except:
+        print("Something went wrong while installing")
+        logger.exception("An exception ocurred while wirtting to disk")
+        os.system("pause")
+        sys.exit(1)
 
     # installing modules
     logger.debug("Installing modules")
@@ -149,7 +169,6 @@ def install():
                     "TMDB_KEY": input("Insert the API key from The Movie Database: ")
                 }
             })
-
         _install(logger, userdata)
         logger.debug("Finished installation")
         print("Installation finished successfully")
@@ -181,7 +200,7 @@ def check_update():
         from github import Github
 
         github = Github(GITHUB_TOKEN)
-        repo = github.get_repo("alexregazzo/%s" % REPO_NAME)
+        repo = github.get_repo(f"{OWNER}/{REPO_NAME}")
         remote_version_data = None
         try:
             content_file = repo.get_contents("version.json", BRANCH_NAME)
