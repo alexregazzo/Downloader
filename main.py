@@ -3,6 +3,7 @@ import threading
 import os
 import sys
 import json
+import time
 from scripts import settings
 import setup
 
@@ -54,8 +55,14 @@ except (FileNotFoundError, json.decoder.JSONDecodeError):
 
 # CHECK UPDATES
 logger.debug("Check updates")
+print("Searching updates...")
 update = setup.check_update()  # dict_keys("LOCAL_VERSION", "REMOTE_VERSION", "UPDATE_CODE")
-if update["UPDATE_CODE"] != setup.UPDATE_NONE:
+
+if update["ERROR"]:
+    print("An error ocurred while trying to get version locally and/or remotely")
+    print("Wait...")
+    time.sleep(2)
+elif update["UPDATE_CODE"] != setup.UPDATE_NONE:
     # Update available
     if update['UPDATE_CODE'] == setup.UPDATE_MAJOR:
         print("There is a MAJOR update available")

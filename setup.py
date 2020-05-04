@@ -191,7 +191,8 @@ def check_update():
     result = {
         "LOCAL_VERSION": None,
         "REMOTE_VERSION": None,
-        "UPDATE_CODE": UPDATE_NONE
+        "UPDATE_CODE": UPDATE_NONE,
+        "ERROR": False
     }
     logger = logging.getLogger("Program.{}".format("check_update"))
     try:
@@ -215,10 +216,12 @@ def check_update():
                 remote_version_data = json.loads(response.text)
         except:
             logger.exception("Unexpected exception ocurred while trying to get version file from github")
+            result['ERROR'] = True
             return result
 
         if remote_version_data is None:
             logger.critical("Could not get version file")
+            result['ERROR'] = True
             return result
         remote_version = remote_version_data['version']
         result["REMOTE_VERSION"] = remote_version
@@ -250,6 +253,7 @@ def check_update():
         logger.debug("No update")
     except:
         logger.exception("An exception ocurred while trying to execute check updates")
+        result['ERROR'] = True
     return result
 
 
