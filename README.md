@@ -18,6 +18,7 @@ download series' episodes to be watched.
 ### v3.1.1 what's changed
 - Shows to which version it is going to update to
 - Prevent multiversion files on github request error
+- Show if there was an error while getting versions
 
 ### v3.1.0 what's changed
 - New feature: remove episodes from download
