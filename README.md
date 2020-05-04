@@ -15,11 +15,15 @@ download series' episodes to be watched.
 * API key from [TMDB](https://www.themoviedb.org/settings/api)
 * [uTorrent](https://www.utorrent.com/intl/pt/downloads/win_us) (current version (v2.0) might work on other torrent clients (might change on later updates))
 
-### v3.0 new features
+### v3.1.0 what's changed
+- New feature: remove episodes from download
+- Bugfix: when you added a out of bounds id while removing serie.
+
+### v3.0.0  what's changed
 - No longer support mysqlserver (all on sqlite3) so database setup is required
 - Setup which allows installation and updates
 
-### v2.0 new features
+### v2.0.0  what's changed
 - User features:
 >- Setup: file that makes startup easy
 >- List recently added episodes (only episodes within 3 hours)
@@ -37,7 +41,7 @@ download series' episodes to be watched.
 >- Changing how the tables are created
 
 
-### v1.0 features
+### v1.0.0 what's changed
 - User features:
 >- Download episode from a specific episode until the end
 >- Download a single episode

@@ -236,13 +236,14 @@ class Database:
         QUERY = f"UPDATE episodio SET epi_uatualizacao = '{datetime.datetime.now().strftime(DATETIME_FORMAT)}' WHERE ser_id = '{ser_id}' AND epi_temporada = '{epi_temporada}' AND epi_episodio = '{epi_episodio}'"
         return self.update(QUERY)
 
-    def setToDownloadAfterEpisode(self, ser_id, epi_temporada, epi_episodio) -> bool:
+    def setToDownloadAfterEpisodeAs(self, ser_id, epi_temporada, epi_episodio, epi_baixar: bool) -> bool:
         """
         Set all episodes after specified episode to download
         :return: whether the operation was performed sucessfully
         """
         # set to download all after an episode (includes episode selected)
-        QUERY = f"UPDATE episodio SET epi_baixar = 1 WHERE ser_id = '{ser_id}' AND (epi_temporada > '{epi_temporada}' OR (epi_temporada = '{epi_temporada}' AND epi_episodio >= '{epi_episodio}'));"
+        epi_baixar = 1 if epi_baixar else 0
+        QUERY = f"UPDATE episodio SET epi_baixar = {epi_baixar} WHERE ser_id = '{ser_id}' AND (epi_temporada > '{epi_temporada}' OR (epi_temporada = '{epi_temporada}' AND epi_episodio >= '{epi_episodio}'));"
         return self.update(QUERY)
 
     def setToDownloadEpisodio(self, ser_id, epi_temporada, epi_episodio):
@@ -250,6 +251,7 @@ class Database:
         Set specified episode to download
         :return: whether the operation was performed sucessfully
         """
+        print("ERROR")
         QUERY = f"UPDATE episodio SET epi_baixar = 1 WHERE ser_id = '{ser_id}' AND epi_temporada = '{epi_temporada}' AND epi_episodio = '{epi_episodio}';"
         return self.update(QUERY)
 
@@ -293,5 +295,5 @@ class Database:
 
 if __name__ == "__main__":
     pass
-    # db = Database()
+    # db = Database()setToUnDownloadAfterEpisode
     # print(db.getToDownloadEpisodeWithoutLink())

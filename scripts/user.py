@@ -63,13 +63,16 @@ def removeSerie():
         except ValueError:
             pass
         else:
-            logger.debug(f"Trying to remove: {series[op - 1]['ser_id']}")
-            if database.removeSerie(series[op - 1]["ser_id"]):
-                print("Série removida com sucesso")
-                logger.debug("Removed")
+            if 0 < op <= len(series):
+                logger.debug(f"Trying to remove: {series[op - 1]['ser_id']}")
+                if database.removeSerie(series[op - 1]["ser_id"]):
+                    print("Série removida com sucesso")
+                    logger.debug("Removed")
+                else:
+                    print("Houve algum erro durante a remoção!")
+                    logger.warning("Problem on removing")
             else:
-                print("Houve algum erro durante a remoção!")
-                logger.warning("Problem on removing")
+                print("Operação cancelada.")
     utils.pause()
 
 
@@ -126,7 +129,7 @@ def downloadAfter():
     print("Temporada: %s" % episode['epi_temporada'])
     print("Episódio: %s" % episode['epi_episodio'])
     if userinput.confirm():
-        if database.setToDownloadAfterEpisode(episode["ser_id"], episode["epi_temporada"], episode["epi_episodio"]):
+        if database.setToDownloadAfterEpisodeAs(episode["ser_id"], episode["epi_temporada"], episode["epi_episodio"], True):
             print("Concluido com sucesso!")
             logger.info("Sucesso ao definir para baixar episodios a partir de '%s'" % str(episode))
         else:
@@ -229,6 +232,73 @@ def downloadmenu():
                 break
 
 
+def undownloadAfter():
+    episode = userinput.getEpisode()  # None or dict_keys(* from serie + epi_temporada + epi_episodio)
+    if episode is None:
+        print("Operação cancelada!")
+        utils.pause()
+        return
+    utils.clear()
+    print("Remover todos os episódios a partir de:")
+    print("Série: %s" % episode['ser_nome'])
+    print("Temporada: %s" % episode['epi_temporada'])
+    print("Episódio: %s" % episode['epi_episodio'])
+    if userinput.confirm():
+        if database.setToDownloadAfterEpisodeAs(episode["ser_id"], episode["epi_temporada"], episode["epi_episodio"], False):
+            print("Concluido com sucesso!")
+            logger.debug("Sucesso ao definir para remover de baixar episodios a partir de '%s'" % str(episode))
+        else:
+            print("Houve um erro ao realizar a ação no banco de dados! Tente mais tarde!")
+            logger.warning("Erro ao definir episodio para baixar a partir de")
+    else:
+        print("operação cancelada!")
+    utils.pause()
+
+
+def undownloadEpisode():
+    episode = userinput.getEpisode()  # dict_keys(* from serie, epi_temporada, epi_episodio)
+    if episode is None:
+        print("Operação cancelada!")
+        utils.pause()
+        return
+    utils.clear()
+    print("Remover download episódio:")
+    print("Série: %s" % episode['ser_nome'])
+    print("Temporada: %s" % episode['epi_temporada'])
+    print("Episódio: %s" % episode['epi_episodio'])
+    if userinput.confirm():
+        if database.setDownloadEpisodeAs(episode["ser_id"], episode["epi_temporada"], episode["epi_episodio"], False):
+            print("Concluido com sucesso!")
+            logger.debug("Sucesso ao definir para não baixar episodio '%s'" % str(episode))
+        else:
+            print("Houve um erro ao realizar a ação no banco de dados! Tente mais tarde!")
+            logger.warning("Erro ao definir episodio para não baixar")
+    else:
+        print("operação cancelada!")
+    utils.pause()
+
+
+def undownloadmenu():
+    while True:
+        utils.clear()
+        print("** Remove from download menu **")
+        print("0 - Voltar")
+        print("1 - Remover a partir de")
+        print("2 - Remover episodio")
+        try:
+            op = int(input("Informe a opção?\n>>"))
+        except ValueError:
+            pass
+        else:
+            utils.clear()
+            if op == 1:
+                undownloadAfter()
+            elif op == 2:
+                undownloadEpisode()
+            else:
+                break
+
+
 def troubleshoot():
     # copy log to desktop
     dp = os.path.join(os.environ["HOMEPATH"], "Desktop")
@@ -265,6 +335,7 @@ def mainmenu():
     print("2 - Listar")
     print("3 - Adicionar")
     print("4 - Remover")
+    print("5 - Remover de download")
     print("+" * 50)
     print("Informe a opção:")
     try:
@@ -289,6 +360,8 @@ def mainmenu():
             adicionarSerie()
         elif choice == 4:  # remover
             removeSerie()
+        elif choice == 5: #remover download
+            undownloadmenu()
     return True
 
 
