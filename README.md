@@ -15,6 +15,10 @@ download series' episodes to be watched.
 * API key from [TMDB](https://www.themoviedb.org/settings/api)
 * [uTorrent](https://www.utorrent.com/intl/pt/downloads/win_us) (current version (v2.0) might work on other torrent clients (might change on later updates))
 
+### v3.1.1 what's changed
+- Shows to which version it is going to update to
+- Prevent multiversion files on github request error
+
 ### v3.1.0 what's changed
 - New feature: remove episodes from download
 - Bugfix: when you added a out of bounds id while removing serie.

@@ -21,10 +21,9 @@ UPDATE_NONE = 0
 UPDATE_PATCH_OR_BUG_FIX = 1
 UPDATE_MINOR = 2
 UPDATE_MAJOR = 3
-# --------------------------------------------------------------------------------------
 
-REMOTE_VERSION = None
-LOCAL_VERSION = None
+
+# --------------------------------------------------------------------------------------
 
 
 def _install(logger, userdata=None):
@@ -186,16 +185,21 @@ def install():
 def check_update():
     """
     Compare installed version with remote version to check if there are updates
-    :return: UPDATE_* definition based on the available update
+    :return: # dict_keys("LOCAL_VERSION", "REMOTE_VERSION", "UPDATE_CODE")
+    UPDATE_CODE: UPDATE_* definition based on the available update
     """
-
+    result = {
+        "LOCAL_VERSION": None,
+        "REMOTE_VERSION": None,
+        "UPDATE_CODE": UPDATE_NONE
+    }
     logger = logging.getLogger("Program.{}".format("check_update"))
     try:
         # Get local installed version
         with open("version.json") as f:
             version = json.load(f)
         local_version = version["version"]
-        LOCAL_VERSION = local_version
+        result["LOCAL_VERSION"] = local_version
         logger.debug("Local version found: %s" % local_version)
         # Get remote version
 
@@ -211,13 +215,13 @@ def check_update():
                 remote_version_data = json.loads(response.text)
         except:
             logger.exception("Unexpected exception ocurred while trying to get version file from github")
-            return UPDATE_NONE
+            return result
 
         if remote_version_data is None:
             logger.critical("Could not get version file")
-            return UPDATE_NONE
+            return result
         remote_version = remote_version_data['version']
-        REMOTE_VERSION = remote_version
+        result["REMOTE_VERSION"] = remote_version
         logger.debug("Remote version found: %s" % remote_version)
         # compare versions
         # version: X.Y.Z
@@ -231,20 +235,22 @@ def check_update():
             if rv > lv:
                 if k == 0:  # major
                     logger.debug("Major update")
-                    return UPDATE_MAJOR
+                    result["UPDATE_CODE"] = UPDATE_MAJOR
+                    return result
                 elif k == 1:  # minor
                     logger.debug("Minor update")
-                    return UPDATE_MINOR
+                    result["UPDATE_CODE"] = UPDATE_MINOR
+                    return result
                 elif k == 2:  # patch/bugfix
                     logger.debug("Patch/bugfix update")
-                    return UPDATE_PATCH_OR_BUG_FIX
+                    result["UPDATE_CODE"] = UPDATE_PATCH_OR_BUG_FIX
+                    return result
                 else:
                     raise NotImplementedError("Something went wrong on versions comparisons comparison - local: %s, remote: %s" % (local_version, remote_version))
         logger.debug("No update")
-        return UPDATE_NONE
     except:
         logger.exception("An exception ocurred while trying to execute check updates")
-        return UPDATE_NONE
+    return result
 
 
 def update():

@@ -54,16 +54,16 @@ except (FileNotFoundError, json.decoder.JSONDecodeError):
 
 # CHECK UPDATES
 logger.debug("Check updates")
-update = setup.check_update()
-if update != setup.UPDATE_NONE:
+update = setup.check_update()  # dict_keys("LOCAL_VERSION", "REMOTE_VERSION", "UPDATE_CODE")
+if update["UPDATE_CODE"] != setup.UPDATE_NONE:
     # Update available
-    if update == setup.UPDATE_MAJOR:
+    if update['UPDATE_CODE'] == setup.UPDATE_MAJOR:
         print("There is a MAJOR update available")
-    elif update == setup.UPDATE_MINOR:
+    elif update['UPDATE_CODE'] == setup.UPDATE_MINOR:
         print("There is a MINOR update available")
-    elif update == setup.UPDATE_PATCH_OR_BUG_FIX:
+    elif update['UPDATE_CODE'] == setup.UPDATE_PATCH_OR_BUG_FIX:
         print("There is a bug fix or patch update available")
-    if input(f"Would you like to update{f' from {setup.LOCAL_VERSION}' if setup.LOCAL_VERSION else ''} {f' to {setup.REMOTE_VERSION}' if setup.REMOTE_VERSION else ''}? [y/n]").lower() == "y":
+    if input(f"""Would you like to update{f" from {update['LOCAL_VERSION']}" if update['LOCAL_VERSION'] else ""}{f" to {update['REMOTE_VERSION']}" if update['REMOTE_VERSION'] else ""}? [y/n]""").lower() == "y":
         setup.update()
         sys.exit(0)
 
