@@ -161,7 +161,7 @@ class Database:
         Get all episodes that should be downloaded and don't have any link
         :return: [dict_keys(ser_id, ser_nome, epi_temporada, epi_episodio, epi_uatualizacao)]
         """
-        QUERY = "SELECT s.ser_id, s.ser_nome, e.epi_temporada, e.epi_episodio, e.epi_uatualizacao FROM episodio AS e NATURAL JOIN serie AS s LEFT JOIN link AS l ON e.ser_id = l.ser_id AND e.epi_temporada = l.epi_temporada AND e.epi_episodio = l.epi_episodio WHERE e.epi_baixar = 1 AND l.lin_id is NULL;"
+        QUERY = "SELECT s.ser_id, s.ser_nome, e.epi_temporada, e.epi_episodio, e.epi_uatualizacao FROM episodio AS e NATURAL JOIN serie AS s LEFT JOIN link AS l ON e.ser_id = l.ser_id AND e.epi_temporada = l.epi_temporada AND e.epi_episodio = l.epi_episodio WHERE e.epi_baixar = 1 AND l.lin_baixando = 0;"
         return self.select(QUERY)
 
     def getToDownloadEpisode(self) -> [dict]:
@@ -263,7 +263,7 @@ class Database:
         Get all episodes that are supposed to be downloaded and has a link
         :return: [dict_keys(* from episode, * from link)]
         """
-        QUERY = "SELECT * FROM episodio AS e NATURAL JOIN link WHERE e.epi_baixar = 1 GROUP BY ser_id, epi_temporada, epi_episodio;"
+        QUERY = "SELECT * FROM episodio AS e NATURAL JOIN link WHERE e.epi_baixar = 1 AND link.lin_baixando = 0 GROUP BY ser_id, epi_temporada, epi_episodio;"
         return self.select(QUERY)
 
     # -----------------------------------------------------------------------------------
