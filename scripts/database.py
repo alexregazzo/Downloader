@@ -161,7 +161,7 @@ class Database:
         Get all episodes that should be downloaded and don't have any link
         :return: [dict_keys(ser_id, ser_nome, epi_temporada, epi_episodio, epi_uatualizacao)]
         """
-        QUERY = "SELECT s.ser_id, s.ser_nome, e.epi_temporada, e.epi_episodio, e.epi_uatualizacao FROM episodio AS e NATURAL JOIN serie AS s LEFT JOIN link AS l ON e.ser_id = l.ser_id AND e.epi_temporada = l.epi_temporada AND e.epi_episodio = l.epi_episodio WHERE e.epi_baixar = 1 AND l.lin_baixando = 0;"
+        QUERY = "SELECT s.ser_id, s.ser_nome, e.epi_temporada, e.epi_episodio, e.epi_uatualizacao FROM episodio AS e NATURAL JOIN serie AS s LEFT JOIN link AS l ON e.ser_id = l.ser_id AND e.epi_temporada = l.epi_temporada AND e.epi_episodio = l.epi_episodio WHERE e.epi_baixar = 1;"
         return self.select(QUERY)
 
     def getToDownloadEpisode(self) -> [dict]:
